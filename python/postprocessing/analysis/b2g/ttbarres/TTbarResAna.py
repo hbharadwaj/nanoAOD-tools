@@ -9,9 +9,9 @@ class TTbarResAna(Module):
         pass
     def beginJob(self, histFile, histDirName):
         Module.beginJob(self, histFile, histDirName)
-        self.addHist( ROOT.TH1F('h_vpt',   'h_vpt',   100, 0, 1000) )
-        self.addHist( ROOT.TH1F('h_ak4pt', 'h_ak4pt', 100, 0, 1000) )
-        self.addHist( ROOT.TH1F('h_ak4ht', 'h_ak4ht', 100, 0, 1000) )        
+        self.addObject( ROOT.TH1F('h_vpt',   'h_vpt',   100, 0, 1000) )
+        self.addObject( ROOT.TH1F('h_ak4pt', 'h_ak4pt', 100, 0, 1000) )
+        self.addObject( ROOT.TH1F('h_ak4ht', 'h_ak4ht', 100, 0, 1000) )        
     def endJob(self):
         Module.endJob(self)
         pass
