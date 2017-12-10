@@ -5,7 +5,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor
 
-from PhysicsTools.NanoAODTools.postprocessing.analysis.b2g.ttbarres.TTbarResAna import *
+from PhysicsTools.NanoAODTools.postprocessing.analysis.b2g.ttbarres.TTbarResAnaHadronic import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.btv.btagSFProducer import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jecUncertainties import *
 
@@ -24,8 +24,11 @@ selection='''
  Sum$((abs(Jet_eta)<2.5 && Jet_pt > 20)) >= 2
 '''
 
-
+import random
+random.seed(12345)
 #p=PostProcessor(".",files,selection.replace('\n',' '),"keep_and_drop.txt",[btagSFProducer("cmva"),jecUncertAll_cppOut(),ttbarres()],provenance=True)
-p=PostProcessor(".",files,selection.replace('\n',' '),"keep_and_drop.txt",[ttbarres()],provenance=False, noOut=True,histFileName='hists.root', histDirName='ttbarres')
+p1=PostProcessor(".",files,selection.replace('\n',' '),"keep_and_drop.txt",[TTbarResAnaHadronic(writePredDist=True)],provenance=False, noOut=True,histFileName='ttbarreshad_predfile.root', histDirName='ttbarres')
+p2=PostProcessor(".",files,selection.replace('\n',' '),"keep_and_drop.txt",[TTbarResAnaHadronic()],provenance=False, noOut=True,histFileName='hists.root', histDirName='ttbarres')
 
-p.run()
+p1.run()
+p2.run()
