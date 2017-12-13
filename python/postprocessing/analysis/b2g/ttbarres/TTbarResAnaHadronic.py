@@ -12,12 +12,14 @@ ROOT.gSystem.Load( '%s/standalone/libAnalysisPredictedDistribution.so' % ( os.ge
 
 
 class TTbarResAnaHadronic(Module):
-    def __init__(self, htCut=1100., minMSD=110., maxMSD=240., tau32Cut=0.6, writePredDist=False):
+    def __init__(self, htCut=1100., minMSD=110., maxMSD=240., tau32Cut=0.6, writePredDist=False ):
         self.htCut = htCut
         self.minMSD = minMSD
         self.maxMSD = maxMSD
         self.tau32Cut = tau32Cut
         self.writePredDist = writePredDist
+        self.writeHistFile = True
+            
         
     def beginJob(self, histFile, histDirName):
         Module.beginJob(self, histFile, histDirName)
@@ -72,16 +74,22 @@ class TTbarResAnaHadronic(Module):
         passTau32 = tau32 < self.tau32Cut 
         passMSD = self.minMSD < jet.msoftdrop < self.maxMSD
         return passTau32 and passMSD
-    
+        
     def analyze(self, event):
         """process event, return True (go to next module) or False (fail, go to next event)"""
 
         # First check the trigger
-        passTrig = event.HLT_AK8PFHT800_TrimMass50 or event.HLT_AK8PFHT850_TrimMass50 or event.HLT_PFHT1050
-        if not passTrig :
-            return False
+        #passTrig = event.HLT_AK8PFHT800_TrimMass50 or event.HLT_AK8PFHT850_TrimMass50 or event.HLT_PFHT1050
+        #if not passTrig :
+        #    return False
         
+        # Next do the PU weighting
         weight = 1.0
+        weight *= event.puWeight
+
+        
+
+        
         ak4jets = list(Collection(event, "Jet"))
         ak8jets = list(Collection(event, "FatJet"))
 
@@ -118,6 +126,7 @@ class TTbarResAnaHadronic(Module):
             if not self.writePredDist:
                 return False
             else:
+                # Here is the anti-tag region selection to derive the mistag rate. 
                 print 'Filling pred dist : ', probejet.p4().P()
                 self.preddist.Fill( probejet.p4().P() )
 
@@ -127,12 +136,11 @@ class TTbarResAnaHadronic(Module):
             self.predJetMTTBAR.Accumulate( ttbarP4.M(), probejet.p4().P(), isTaggedDict[probejet], weight )
         
         # Now fill the double tagged histogram
-        if isTaggedDict[probejet]: 
+        if isTaggedDict[probejet] : 
             self.h_mttbar.Fill( ttbarP4.M(), weight )
             return True
-        else: 
+        else :
             return False
-                
 
 # define modules using the syntax 'name = lambda : constructor' to avoid having them loaded when not needed
 
