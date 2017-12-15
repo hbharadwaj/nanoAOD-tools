@@ -6,10 +6,7 @@ from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 from PhysicsTools.NanoAODTools.postprocessing.tools import *
 
 import random
-# Temporary problem with ROOT, it looks like this works:
-import os
-ROOT.gSystem.Load( '%s/standalone/libAnalysisPredictedDistribution.so' % ( os.getenv('PREDDIST_DIR') ) ) 
-
+ROOT.gSystem.Load('libAnalysisPredictedDistribution')
 
 class TTbarResAnaHadronic(Module):
     def __init__(self, htCut=1100., minMSD=110., maxMSD=240., tau32Cut=0.6, writePredDist=False ):
@@ -128,7 +125,7 @@ class TTbarResAnaHadronic(Module):
             else:
                 # Here is the anti-tag region selection to derive the mistag rate. 
                 print 'Filling pred dist : ', probejet.p4().P()
-                self.preddist.Fill( probejet.p4().P() )
+                self.preddist.Fill( probejet.p4().P(), weight )
 
         if not self.writePredDist:
             # Now get the predicted background estimate

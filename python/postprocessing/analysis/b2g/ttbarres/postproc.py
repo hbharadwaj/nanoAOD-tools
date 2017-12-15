@@ -23,7 +23,10 @@ import random
 random.seed(12345)
 
 #p=PostProcessor(".",files,selection.replace('\n',' '),"keep_and_drop.txt",[btagSFProducer("cmva"),jecUncertAll_cppOut(),ttbarres()],provenance=True)
-p1=PostProcessor(".",files,'',"keep_and_drop.txt",[puWeight(),jetmetUncertainties(),TTbarResAnaHadronic(writePredDist=True)],provenance=False, noOut=True,histFileName='ttbarreshad_predfile.root', histDirName='ttbarres', postfix='predwrite')
+#p1=PostProcessor(".",files,'',"keep_and_drop.txt",[puWeight(),jetmetUncertainties(),TTbarResAnaHadronic(writePredDist=True)],provenance=False, noOut=True,histFileName='ttbarreshad_predfile.root', histDirName='ttbarres', postfix='predwrite')
+p1=PostProcessor(".",files,'',"keep_and_drop.txt",[puWeight(),TTbarResAnaHadronic(writePredDist=True)],provenance=False, histFileName='ttbarreshad_predfile.root', histDirName='ttbarres', postfix='predwrite')
+
+
 #p2=PostProcessor(".",['test94X_NANO_addPU.root'],'',"keep_and_drop.txt",[TTbarResAnaHadronic()],provenance=False, noOut=True,histFileName='hists.root', histDirName='ttbarres', postfix='predread')
 
 p1.run()
