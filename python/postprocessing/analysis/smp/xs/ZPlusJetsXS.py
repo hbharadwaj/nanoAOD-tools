@@ -43,17 +43,26 @@ class ZPlusJetsXS(Module):
     def analyze(self, event):
         """process event, return True (go to next module) or False (fail, go to next event)"""
         weight = 1.0
-            
+
+        # List of reco jets:
         recojets = list(Collection(event, "FatJet"))
+        # List of reco subjets:
         recosubjets = list(Collection(event,"SubJet"))
+        # List of gen jets:
         genjets = list(Collection(event, "GenJetAK8"))
-        gensubjets = list(Collection(event, "SubGenJetAK8"))        
+        # List of gen subjets (no direct link from Genjet):
+        gensubjets = list(Collection(event, "SubGenJetAK8"))
+        # Dictionary to hold reco--> gen matching
         recoToGen = matchObjectCollection( recojets, genjets, dRmax=0.1 )
+        # Dictionary to hold ungroomed-->groomed for gen
         genjetsGroomed = {}
+        # Dictionary to hold ungroomed-->groomed for reco
         recojetsGroomed = {}
+        # Get the groomed gen jets
         for igen,gen in enumerate(genjets):
             gensubjetsMatched = self.getSubjets( p4=gen.p4(),subjets=gensubjets, dRmax=0.8)
             genjetsGroomed[gen] = sum( gensubjetsMatched, ROOT.TLorentzVector() ) if len(gensubjetsMatched) > 0 else None
+        # Get the groomed reco jets
         for ireco,reco in enumerate(recojets):
             if reco.subJetIdx1 >= 0 and reco.subJetIdx2 >= 0 :
                 recojetsGroomed[reco] = recosubjets[reco.subJetIdx1].p4() + recosubjets[reco.subJetIdx2].p4()
@@ -62,6 +71,11 @@ class ZPlusJetsXS(Module):
             else :
                 recojetsGroomed[reco] = None
 
+        # Loop over the reco,gen pairs.
+        # Check if there are reco and gen SD jets
+        # If both reco+gen: "fill"
+        # If only reco: "fake"
+        # (See below for "misses")
         for reco,gen in recoToGen.iteritems():
             recoSD = recojetsGroomed[reco]
             if reco == None or recoSD == None :
@@ -81,6 +95,8 @@ class ZPlusJetsXS(Module):
                     self.h_gen.Fill( genSD.M() )                
             if genval == None :
                 self.h_fake.Fill( recoSD.M() )
+        # Now loop over gen jets. If not in reco-->gen list,
+        # then we have a "miss"
         for igen,gen in enumerate(genjets):
             if gen not in recoToGen.values() :
                 genSD = genjetsGroomed[gen]
@@ -89,7 +105,6 @@ class ZPlusJetsXS(Module):
                 self.h_response.Fill( genSD.M(), -1.0 )
                 self.h_gen.Fill( genSD.M() )
                 self.h_miss.Fill( genSD.M() )
-
 
         return True
 # define modules using the syntax 'name = lambda : constructor' to avoid having them loaded when not needed
