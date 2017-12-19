@@ -10,7 +10,7 @@ from PhysicsTools.NanoAODTools.postprocessing.analysis.smp.xs.ZPlusJetsXS import
 #from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetmetUncertainties import *
 #from PhysicsTools.NanoAODTools.postprocessing.examples.puWeightProducer import *
 
-files=["/data/NanoAOD/zjets_test.root"]
+files=["~/cernbox/NANO/zjets_test.root"]
 
 import random
 random.seed(12345)
