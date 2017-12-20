@@ -18,7 +18,9 @@ class ZPlusJetsXS(Module):
         self.nbinsm = len(self.mBin) - 1
         self.mBinB = array.array('d', [0, 2.5, 5, 7.5, 10, 15, 20,30, 40,50, 60, 70, 80, 90,100 ,125,150,175, 200,225, 250,275, 300, 325,350])
         self.nbinsmB = len(self.mBinB) - 1
-        
+
+        self.minDPhiZJet = 2.0
+        self.minZpt = 200.
         
         #self.addObject( ROOT.TH2F('h_response',   'h_response',   self.nbinsmB, self.mBinB, self.nbinsm, self.mBin) )
         self.addObject( ROOT.TH2F('h_response',   'h_response',   self.nbinsm, self.mBin, self.nbinsm, self.mBin) )
@@ -44,24 +46,83 @@ class ZPlusJetsXS(Module):
         """process event, return True (go to next module) or False (fail, go to next event)"""
         weight = 1.0
 
+        
+        isMC = event.run == 1
+        if self.verbose:
+            print '------------------------ ', event.event
+
+        if isMC:
+            ###### Get gen Z candidate #######
+            allgen = Collection(event, "GenPart")
+            zbosons = [ x for x in allgen if abs(x.pdgId) == 23 ]
+            genmuons = [ x for x in allgen if abs(x.pdgId) == 13 ]
+            if len(zbosons) == 0 :
+                return False
+            Zboson = zbosons[ len(zbosons)-1]
+            if Zboson.p4().Perp() < self.minZpt * 0.9 :
+                return False
+            if self.verbose:
+                print '-----'
+                print ' gen Z   : %6.2f %5.2f %5.2f %6.2f ' % ( Zboson.p4().Perp(), Zboson.p4().Eta(), Zboson.p4().Phi(), Zboson.p4().M() )
+
+            ###### Get list of gen jets #######
+            # List of gen jets:
+            allgenjets = list(Collection(event, "GenJetAK8"))
+            if self.verbose:
+                print '-----'
+                print 'all genjets:'
+                for genjet in allgenjets:                    
+                    print '         : %6.2f %5.2f %5.2f %6.2f ' % ( genjet.p4().Perp(), genjet.p4().Eta(), genjet.p4().Phi(), genjet.p4().M() )
+            genjets = [ x for x in allgenjets if x.p4().DeltaPhi( Zboson.p4() ) > self.minDPhiZJet ]
+            # List of gen subjets (no direct link from Genjet):
+            gensubjets = list(Collection(event, "SubGenJetAK8"))
+            # Dictionary to hold ungroomed-->groomed for gen
+            genjetsGroomed = {}
+            # Get the groomed gen jets
+            for igen,gen in enumerate(genjets):
+                gensubjetsMatched = self.getSubjets( p4=gen.p4(),subjets=gensubjets, dRmax=0.8)
+                genjetsGroomed[gen] = sum( gensubjetsMatched, ROOT.TLorentzVector() ) if len(gensubjetsMatched) > 0 else None
+
+            if self.verbose:
+                print '----'
+                print 'opposite-Z genjets:'
+                for genjet in genjets:
+                    sdmassgen = genjetsGroomed[genjet].M() if genjet in genjetsGroomed else -1.0
+                    print '         : %6.2f %5.2f %5.2f %6.2f %6.2f' % ( genjet.p4().Perp(), genjet.p4().Eta(), genjet.p4().Phi(), genjet.p4().M(), sdmassgen )            
+            
+
+            
+        ###### Get reco Z candidate #######
+        # List of reco muons
+        allmuons = Collection(event, "Muon")
+        # Select reco muons:
+        muons = [ x for x in allmuons if x.tightId ]
+        if len(muons) < 2 :
+            return False
+        Zcand = muons[0].p4() + muons[1].p4()
+        if Zcand.Perp() < self.minZpt or Zcand.M() < 50. or Zcand.M() > 120. :
+            return False
+        if self.verbose:
+            print '-----'
+            print ' recoZ   : %6.2f %5.2f %5.2f %6.2f ' % ( Zcand.Perp(), Zcand.Eta(), Zcand.Phi(), Zcand.M() )
+        
+        ###### Get list of reco jets #######
         # List of reco jets:
-        recojets = list(Collection(event, "FatJet"))
+        allrecojets = list(Collection(event, "FatJet"))
+        if self.verbose:
+            print '----'
+            print 'all recojets:'
+            for recojet in allrecojets:                    
+                print '         : %6.2f %5.2f %5.2f %6.2f ' % ( recojet.p4().Perp(), recojet.p4().Eta(), recojet.p4().Phi(), recojet.p4().M() )
+        recojets = [ x for x in allrecojets if x.p4().DeltaPhi( Zcand ) > self.minDPhiZJet ]
+        if isMC == False:
+            genjets = [None] * len(recojets)
         # List of reco subjets:
         recosubjets = list(Collection(event,"SubJet"))
-        # List of gen jets:
-        genjets = list(Collection(event, "GenJetAK8"))
-        # List of gen subjets (no direct link from Genjet):
-        gensubjets = list(Collection(event, "SubGenJetAK8"))
         # Dictionary to hold reco--> gen matching
         recoToGen = matchObjectCollection( recojets, genjets, dRmax=0.1 )
-        # Dictionary to hold ungroomed-->groomed for gen
-        genjetsGroomed = {}
         # Dictionary to hold ungroomed-->groomed for reco
-        recojetsGroomed = {}
-        # Get the groomed gen jets
-        for igen,gen in enumerate(genjets):
-            gensubjetsMatched = self.getSubjets( p4=gen.p4(),subjets=gensubjets, dRmax=0.8)
-            genjetsGroomed[gen] = sum( gensubjetsMatched, ROOT.TLorentzVector() ) if len(gensubjetsMatched) > 0 else None
+        recojetsGroomed = {}        
         # Get the groomed reco jets
         for ireco,reco in enumerate(recojets):
             if reco.subJetIdx1 >= 0 and reco.subJetIdx2 >= 0 :
@@ -71,6 +132,14 @@ class ZPlusJetsXS(Module):
             else :
                 recojetsGroomed[reco] = None
 
+        if self.verbose:
+            print '----'
+            print 'opposite-Z recojets:'
+            for recojet in recojets:
+                sdmassreco = recojetsGroomed[recojet].M() if recojet in recojetsGroomed and recojetsGroomed[recojet] != None else -1.0
+                print '         : %6.2f %5.2f %5.2f %6.2f %6.2f' % ( recojet.p4().Perp(), recojet.p4().Eta(), recojet.p4().Phi(), recojet.p4().M(), sdmassreco )            
+
+                
         # Loop over the reco,gen pairs.
         # Check if there are reco and gen SD jets
         # If both reco+gen: "fill"
@@ -98,7 +167,7 @@ class ZPlusJetsXS(Module):
         # Now loop over gen jets. If not in reco-->gen list,
         # then we have a "miss"
         for igen,gen in enumerate(genjets):
-            if gen not in recoToGen.values() :
+            if gen != None and gen not in recoToGen.values() :
                 genSD = genjetsGroomed[gen]
                 if genSD == None :
                     continue
