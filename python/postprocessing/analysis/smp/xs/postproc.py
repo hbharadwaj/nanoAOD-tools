@@ -10,9 +10,11 @@ from PhysicsTools.NanoAODTools.postprocessing.analysis.smp.xs.ZPlusJetsXS import
 #from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetmetUncertainties import *
 #from PhysicsTools.NanoAODTools.postprocessing.examples.puWeightProducer import *
 
-files=["~/cernbox/NANO/zjets_test.root"]
+with open('zjets_files.txt') as f:
+    files = f.readlines()
+files = [x.strip() for x in files] 
 
 import random
 random.seed(12345)
-p1=PostProcessor(".",files,'nFatJet + nGenJetAK8 >= 1 && GenJetAK8_pt > 110',"keep_and_drop.txt",[ZPlusJetsXS()],provenance=False, histFileName='zplusjetsxs_hists.root', histDirName='zjets', postfix='zjets')
+p1=PostProcessor(".",files,'nFatJet + nGenJetAK8 >= 1 && GenJetAK8_pt > 110',"keep_and_drop.txt",[ZPlusJetsXS()],provenance=False,noOut=True, histFileName='zplusjetsxs_hists.root', histDirName='zjets', postfix='zjets')
 p1.run()
