@@ -41,7 +41,18 @@ class ZPlusJetsXS(Module):
             if p4.DeltaR(subjet.p4()) < dRmax and len(ret) < 2 :
                 ret.append(subjet.p4())
         return ret
-        
+
+    def printP4( self, c ):
+        if hasattr( c, "p4"):
+            s = ' %6.2f %5.2f %5.2f %6.2f ' % ( c.p4().Perp(), c.p4().Eta(), c.p4().Phi(), c.p4().M() )
+        else :
+            s = ' %6.2f %5.2f %5.2f %6.2f ' % ( c.Perp(), c.Eta(), c.Phi(), c.M() )
+        return s
+    def printCollection(self,coll):
+        for ic,c in enumerate(coll):
+            s = self.printP4( c )
+            print ' %3d : %s' % ( ic, s )
+            
     def analyze(self, event):
         """process event, return True (go to next module) or False (fail, go to next event)"""
         weight = 1.0
@@ -63,7 +74,7 @@ class ZPlusJetsXS(Module):
                 return False
             if self.verbose:
                 print '-----'
-                print ' gen Z   : %6.2f %5.2f %5.2f %6.2f ' % ( Zboson.p4().Perp(), Zboson.p4().Eta(), Zboson.p4().Phi(), Zboson.p4().M() )
+                print self.printP4( Zboson )
 
             ###### Get list of gen jets #######
             # List of gen jets:
@@ -71,8 +82,7 @@ class ZPlusJetsXS(Module):
             if self.verbose:
                 print '-----'
                 print 'all genjets:'
-                for genjet in allgenjets:                    
-                    print '         : %6.2f %5.2f %5.2f %6.2f ' % ( genjet.p4().Perp(), genjet.p4().Eta(), genjet.p4().Phi(), genjet.p4().M() )
+                self.printCollection( allgenjets )
             genjets = [ x for x in allgenjets if x.p4().DeltaPhi( Zboson.p4() ) > self.minDPhiZJet ]
             # List of gen subjets (no direct link from Genjet):
             gensubjets = list(Collection(event, "SubGenJetAK8"))
@@ -88,7 +98,7 @@ class ZPlusJetsXS(Module):
                 print 'opposite-Z genjets:'
                 for genjet in genjets:
                     sdmassgen = genjetsGroomed[genjet].M() if genjet in genjetsGroomed else -1.0
-                    print '         : %6.2f %5.2f %5.2f %6.2f %6.2f' % ( genjet.p4().Perp(), genjet.p4().Eta(), genjet.p4().Phi(), genjet.p4().M(), sdmassgen )            
+                    print '         : %s %6.2f' % ( self.printP4(genjet), sdmassgen )            
             
 
             
@@ -104,7 +114,7 @@ class ZPlusJetsXS(Module):
             return False
         if self.verbose:
             print '-----'
-            print ' recoZ   : %6.2f %5.2f %5.2f %6.2f ' % ( Zcand.Perp(), Zcand.Eta(), Zcand.Phi(), Zcand.M() )
+            print ' recoZ:', self.printP4( Zcand )
         
         ###### Get list of reco jets #######
         # List of reco jets:
@@ -112,8 +122,7 @@ class ZPlusJetsXS(Module):
         if self.verbose:
             print '----'
             print 'all recojets:'
-            for recojet in allrecojets:                    
-                print '         : %6.2f %5.2f %5.2f %6.2f ' % ( recojet.p4().Perp(), recojet.p4().Eta(), recojet.p4().Phi(), recojet.p4().M() )
+            self.printCollection( allrecojets )
         recojets = [ x for x in allrecojets if x.p4().DeltaPhi( Zcand ) > self.minDPhiZJet ]
         if isMC == False:
             genjets = [None] * len(recojets)
@@ -137,7 +146,7 @@ class ZPlusJetsXS(Module):
             print 'opposite-Z recojets:'
             for recojet in recojets:
                 sdmassreco = recojetsGroomed[recojet].M() if recojet in recojetsGroomed and recojetsGroomed[recojet] != None else -1.0
-                print '         : %6.2f %5.2f %5.2f %6.2f %6.2f' % ( recojet.p4().Perp(), recojet.p4().Eta(), recojet.p4().Phi(), recojet.p4().M(), sdmassreco )            
+                print '         : %s %6.2f' % ( self.printP4( recojet),  sdmassreco )            
 
                 
         # Loop over the reco,gen pairs.
@@ -155,13 +164,35 @@ class ZPlusJetsXS(Module):
                 genSD = genjetsGroomed[gen]
                 if genSD != None:
                     if self.verbose : 
-                        print ' reco: %6.2f %5.2f %5.2f %6.2f %6.2f , gen : %6.2f %5.2f %5.2f %6.2f %6.2f ' % (
-                            reco.p4().Perp(), reco.p4().Eta(), reco.p4().Phi(), reco.p4().M(), recoSD.M(),
-                            gen.p4().Perp(), gen.p4().Eta(), gen.p4().Phi(), gen.p4().M(), genSD.M()
+                        print ' reco: %s %8.4f , gen : %s %8.4f ' % (
+                            self.printP4(reco), recoSD.M(),
+                            self.printP4(gen), genSD.M()
                             )
                     genval = genSD.M()
                     self.h_response.Fill( genSD.M(), recoSD.M() )
-                    self.h_gen.Fill( genSD.M() )                
+                    self.h_gen.Fill( genSD.M() )
+
+
+                    if recoSD.M() > 10 and genSD.M() > 10 and (genSD.M() / recoSD.M() < 0.5 or genSD.M() / recoSD.M() > 2.0) :
+                        print '---------------------------------'
+                        print ' reco: %s %8.4f , gen : %s %8.4f ' % (
+                            self.printP4(reco), recoSD.M(),
+                            self.printP4(gen), genSD.M()
+                            )
+                        print 'Z boson:'
+                        print self.printP4( Zboson )
+                        print 'Z candidate:'
+                        print self.printP4( Zcand )
+                        print 'Muons:'
+                        self.printCollection( muons )
+                        print 'Gen jets:'
+                        self.printCollection( genjets )
+                        print 'Gen subjets:'
+                        self.printCollection( gensubjets )
+                        print 'Reco jets:'
+                        self.printCollection( recojets )
+                        print 'Reco subjets:'
+                        self.printCollection( recosubjets )
             if genval == None :
                 self.h_fake.Fill( recoSD.M() )
         # Now loop over gen jets. If not in reco-->gen list,
