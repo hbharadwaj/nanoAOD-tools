@@ -14,24 +14,28 @@ class ZPlusJetsXS(Module):
         self.verbose = False
     def beginJob(self, histFile, histDirName):
         Module.beginJob(self, histFile, histDirName)
-        #self.mBin = array.array('d', [0, 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]) #array.array('d', [0, 5, 10, 20, 40, 60, 80, 100 ,150, 200, 350])
-        self.binsGen = array.array('d', [0, 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]) 
+        self.binsGen = array.array('d', [0, 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 100]) 
         self.nGen = len(self.binsGen) - 1
-        self.binsDet = array.array('d', [0, 0.5, 1, 3, 5, 7.5, 10, 12.5, 15, 17.5, 20, 22.5, 25, 27.5, 30, 32.5, 35, 37.5, 40, 42.5, 45, 47.5, 50])
+        self.binsDet = array.array('d', [0, 0.5, 1, 3, 5, 7.5, 10, 12.5, 15, 17.5, 20, 22.5, 25, 27.5, 30, 32.5, 35, 37.5, 40, 42.5, 45, 47.5, 50, 75., 100.])
         self.nDet = len(self.binsDet) - 1
+        self.nDetSD = 18
+        self.nGenSD = 9
 
         self.minDPhiZJet = 1.57
         self.minZpt = 120.
         self.minJetPt = 220.
         
-        self.addObject( ROOT.TH2D('h_response',     'h_response',   self.nDet, self.binsDet, self.nGen, self.binsGen) )
+        self.addObject( ROOT.TH2D('h_response',     'h_response',   self.nDetSD, self.binsDet, self.nGenSD, self.binsGen) )
+        self.addObject( ROOT.TH1D('h_reco',         'h_reco',       self.nDetSD, self.binsDet) )
+        self.addObject( ROOT.TH1D('h_gen',          'h_gen',        self.nGenSD, self.binsGen) )
+        self.addObject( ROOT.TH1D('h_fake',         'h_fake',       self.nDetSD, self.binsDet) )
+        self.addObject( ROOT.TH1D('h_miss',         'h_miss',       self.nGenSD, self.binsGen) )
+        
         self.addObject( ROOT.TH2D('h_response_u',   'h_response_u', self.nDet, self.binsDet, self.nGen, self.binsGen) )
-        self.addObject( ROOT.TH1D('h_reco',         'h_reco',       self.nDet, self.binsDet) )
-        self.addObject( ROOT.TH1D('h_gen',          'h_gen',        self.nGen, self.binsGen) )
         self.addObject( ROOT.TH1D('h_reco_u',       'h_reco_u',     self.nDet, self.binsDet) )
         self.addObject( ROOT.TH1D('h_gen_u',        'h_gen_u',      self.nGen, self.binsGen) )
-        self.addObject( ROOT.TH1D('h_fake',         'h_fake',       self.nDet, self.binsDet) )
-        self.addObject( ROOT.TH1D('h_miss',         'h_miss',       self.nGen, self.binsGen) )
+        self.addObject( ROOT.TH1D('h_fake_u',       'h_fake_u',     self.nDet, self.binsDet) )
+        self.addObject( ROOT.TH1D('h_miss_u',       'h_miss_u',     self.nGen, self.binsGen) )
         self.addObject( ROOT.TH1D('h_zpt',          'h_zpt',        100, 0, 500 ) )
         self.addObject( ROOT.TH1D('h_zmass',        'h_zmass',      100, 50, 150 ) )
         self.addObject( ROOT.TH1D('h_genjetpt',     'h_genjetpt',   100, 0, 500 ) )
@@ -101,7 +105,7 @@ class ZPlusJetsXS(Module):
                 print '-----'
                 print 'all genjets:'
                 self.printCollection( allgenjets )
-            genjets = [ x for x in allgenjets if x.p4().Perp() > self.minJetPt * 0.5 and x.p4().DeltaPhi( Zboson ) > self.minDPhiZJet ]
+            genjets = [ x for x in allgenjets if x.p4().Perp() > self.minJetPt * 0.8 and x.p4().DeltaPhi( Zboson ) > self.minDPhiZJet ]
             # List of gen subjets (no direct link from Genjet):
             gensubjets = list(Collection(event, "SubGenJetAK8"))
             # Dictionary to hold ungroomed-->groomed for gen
@@ -178,37 +182,67 @@ class ZPlusJetsXS(Module):
         # (See below for "misses")
         for reco,gen in recoToGen.iteritems():
             recoSD = recojetsGroomed[reco]
-            if reco == None :#or recoSD == None :
+            if reco == None :
                 continue
-            #self.h_reco.Fill( recoSD.M() )\
+            # Always fill the ungroomed det
+            self.h_reco_u.Fill( reco.p4().M() )
+            if recoSD != None :
+                # Fill the groomed det if available
+                self.h_reco.Fill( recoSD.M() )
+
+            # Now check ungroomed gen
             genSDVal = None
             if gen != None:
 
+                # Ungroomed gen OK, fill ungroomed response and truth
                 self.h_response_u.Fill( reco.p4().M(), gen.p4().M() )
-                self.h_reco_u.Fill( reco.p4().M() )
                 self.h_gen_u.Fill( gen.p4().M() )
-                
+                self.h_genjetpt.Fill( gen.p4().Perp() )
+                self.h_recojetpt.Fill( reco.p4().Perp() )
+                self.h_drGenReco.Fill( reco.p4().DeltaR(gen.p4()) )
+
                 genSD = genjetsGroomed[gen]
                 if recoSD != None and genSD != None:
+                    # Groomed gen OK, fill groomed response and truth
                     if self.verbose : 
                         print ' reco: %s %8.4f, gen : %s %8.4f ' % (
                             self.printP4(reco), recoSD.M(), 
                             self.printP4(gen), genSD.M()
                             )
                     genSDVal = genSD.M()
-                    self.h_genjetpt.Fill( gen.p4().Perp() )
-                    self.h_recojetpt.Fill( reco.p4().Perp() )
                     self.h_response.Fill( recoSD.M(), genSD.M() )
-                    self.h_gen.Fill( genSD.M() )                    
-                    self.h_reco.Fill( recoSD.M() )
-                    self.h_drGenReco.Fill( reco.p4().DeltaR(gen.p4()) )
-            if genSDVal == None and recoSD != None :
-                self.h_fake.Fill( recoSD.M() )
+                    self.h_gen.Fill( genSD.M() )
+            else :
+                # No ungroomed jet at all. Ungroomed fake.
+                self.h_fake_u.Fill( reco.p4().M() )
+                # Here we have a groomed det, but no groomed gen. Groomed fake. 
+                if genSDVal == None and recoSD != None :
+                    self.h_fake.Fill( recoSD.M() )
         # Now loop over gen jets. If not in reco-->gen list,
         # then we have a "miss"
         for igen,gen in enumerate(genjets):
             if gen != None and gen not in recoToGen.values() :
+                #print 'Missed!'
+                #print 'Zboson: ', self.printP4( Zboson )
+                #print 'Zcand : ', self.printP4( Zcand )
+                #print 'GenJet: ', self.printP4( gen )
+                #print 'Reco Jets:',
+                #self.printCollection( recojets )
+                #print ''
+                #for ireco,igen in recoToGen :
+                #    if ireco != None : 
+                #        print self.printP4( ireco )
+                #    if igen != None:
+                #        print self.printP4( igen )
+
+                # Ungroomed miss: 
+                self.h_response_u.Fill( -1.0, gen.p4().M() )
+                self.h_gen_u.Fill(gen.p4().M())
+                self.h_miss_u.Fill(gen.p4().M())
+                
                 genSD = genjetsGroomed[gen]
+                # Groomed miss: check if there is a groomed gen.
+                # If there isn't, it gets skipped. 
                 if genSD == None :
                     continue
                 self.h_response.Fill( -1.0, genSD.M() )

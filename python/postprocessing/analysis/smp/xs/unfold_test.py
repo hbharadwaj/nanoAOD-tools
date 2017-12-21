@@ -2,26 +2,19 @@ import ROOT
 
 f = ROOT.TFile("zplusjetsxs_hists.root")
 
-h_response = f.Get('zjets/h_response')
-h_reco = f.Get('zjets/h_reco')
-h_gen = f.Get('zjets/h_gen')
-h_fake = f.Get('zjets/h_fake')
-h_miss = f.Get('zjets/h_miss')
+isGroomed = False
+if not isGroomed :
+    postfix = '_u'
+else :
+    postfix = ''
 
-#h_response.GetXaxis().SetRangeUser(0,40)
-#h_response.GetYaxis().SetRangeUser(0,40)
-#h_reco.GetXaxis().SetRangeUser(0,40)
-#h_gen.GetXaxis().SetRangeUser(0,40)
+h_response = f.Get('zjets/h_response' + postfix)
+h_reco = f.Get('zjets/h_reco' + postfix)
+h_gen = f.Get('zjets/h_gen' + postfix)
+h_fake = f.Get('zjets/h_fake' + postfix)
+h_miss = f.Get('zjets/h_miss' + postfix)
 
-'''         
-for ihist in [h_reco,h_gen,h_fake,h_miss]:    
-    for i in xrange(ihist.GetNbinsX()+1):        
-        wx = ihist.GetXaxis().GetBinWidth(i)                
-        ihist.SetBinContent( i, ihist.GetBinContent(i)/wx)
-        ihist.SetBinError( i, ihist.GetBinError(i)/wx)
-'''
-#h_reco.Add( h_fake, -1.0 )
-#h_gen.Add( h_miss, -1.0 )
+h_reco.Add( h_fake, -1.0 )
 
 tunfolder = ROOT.TUnfoldDensity(h_response,ROOT.TUnfold.kHistMapOutputVert,ROOT.TUnfold.kRegModeNone, ROOT.TUnfold.kEConstraintNone, ROOT.TUnfoldDensity.kDensityModeBinWidth) 
 tunfolder.SetInput( h_reco )
@@ -32,6 +25,12 @@ tunfolder.SetInput( h_reco )
 
 tunfolder.DoUnfold(0.0)
 h_unfolded = tunfolder.GetOutput("unfolded")
+
+
+for ihist in [ h_gen, h_unfolded ] :
+    for x in xrange(ihist.GetNbinsX()+1):
+        ihist.SetBinContent(x, ihist.GetBinContent(x)/ihist.GetXaxis().GetBinWidth(x))
+
 
 h_reco.SetLineColor(ROOT.kBlack)
 h_gen.SetLineColor(ROOT.kRed)
