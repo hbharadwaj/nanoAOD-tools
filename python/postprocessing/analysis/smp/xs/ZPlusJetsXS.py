@@ -20,7 +20,7 @@ class ZPlusJetsXS(Module):
         self.nbinsmB = len(self.mBinB) - 1
 
         self.minDPhiZJet = 2.0
-        self.minZpt = 200.
+        self.minZpt = 120.
         self.minJetPt = 220.
         
         #self.addObject( ROOT.TH2F('h_response',   'h_response',   self.nbinsmB, self.mBinB, self.nbinsm, self.mBin) )
@@ -31,8 +31,9 @@ class ZPlusJetsXS(Module):
         self.addObject( ROOT.TH1F('h_miss',   'h_miss',   self.nbinsm, self.mBin) )
         self.addObject( ROOT.TH1F('h_zpt', 'h_zpt', 100, 0, 500 ) )
         self.addObject( ROOT.TH1F('h_zmass', 'h_zmass', 100, 50, 150 ) )
-        self.addObject( ROOT.TH1F('h_jetpt', 'h_jetpt', 100, 0, 500 ) )
-                            
+        self.addObject( ROOT.TH1F('h_genjetpt', 'h_genjetpt', 100, 0, 500 ) )
+        self.addObject( ROOT.TH1F('h_recojetpt', 'h_recojetpt', 100, 0, 500 ) )
+
         self.addObject( ROOT.TH1F('h_drGenReco',    'h_drGenReco',    40, 0, 0.8) )
         self.addObject( ROOT.TH1F('h_drGenGroomed', 'h_drGenGroomed', 40, 0, 0.8) )
                             
@@ -75,12 +76,19 @@ class ZPlusJetsXS(Module):
             genleptons = Collection(event, "GenDressedLepton")
 
             if len(genleptons) < 2 :
-                return False            
+                return False
+            if abs(genleptons[0].pdgId) != 13 :
+                return False
+            if self.verbose :
+                print '----'
+                print 'Gen leptons:'
+                self.printCollection( genleptons )
             Zboson = genleptons[0].p4() + genleptons[1].p4()
-            if Zboson.p4().Perp() < self.minZpt * 0.9 :
+            if Zboson.Perp() < self.minZpt * 0.9 :
                 return False
             if self.verbose:
                 print '-----'
+                print 'Gen Z:'
                 print self.printP4( Zboson )
 
             ###### Get list of gen jets #######
@@ -90,7 +98,7 @@ class ZPlusJetsXS(Module):
                 print '-----'
                 print 'all genjets:'
                 self.printCollection( allgenjets )
-            genjets = [ x for x in allgenjets if x.p4().Perp() > self.minJetPt * 0.5 and x.p4().DeltaPhi( Zboson.p4() ) > self.minDPhiZJet ]
+            genjets = [ x for x in allgenjets if x.p4().Perp() > self.minJetPt * 0.5 and x.p4().DeltaPhi( Zboson ) > self.minDPhiZJet ]
             # List of gen subjets (no direct link from Genjet):
             gensubjets = list(Collection(event, "SubGenJetAK8"))
             # Dictionary to hold ungroomed-->groomed for gen
@@ -119,6 +127,8 @@ class ZPlusJetsXS(Module):
         Zcand = muons[0].p4() + muons[1].p4()
         if Zcand.Perp() < self.minZpt or Zcand.M() < 50. or Zcand.M() > 150. :
             return False
+        self.h_zpt.Fill( Zcand.Perp() )
+        self.h_zmass.Fill( Zcand.M() )
         if self.verbose:
             print '-----'
             print ' recoZ:', self.printP4( Zcand )
@@ -165,43 +175,24 @@ class ZPlusJetsXS(Module):
             recoSD = recojetsGroomed[reco]
             if reco == None or recoSD == None :
                 continue
-            #self.h_reco.Fill( recoSD.M() )
+            #self.h_reco.Fill( recoSD.M() )\
             genval = None
             if gen != None:
                 genSD = genjetsGroomed[gen]
                 if genSD != None:
                     if self.verbose : 
-                        print ' reco: %s %8.4f , gen : %s %8.4f ' % (
-                            self.printP4(reco), recoSD.M(),
+                        print ' reco: %s %8.4f, gen : %s %8.4f ' % (
+                            self.printP4(reco), recoSD.M(), 
                             self.printP4(gen), genSD.M()
                             )
                     genval = genSD.M()
+                    self.h_genjetpt.Fill( gen.p4().Perp() )
+                    self.h_recojetpt.Fill( reco.p4().Perp() )
                     self.h_response.Fill( genSD.M(), recoSD.M() )
                     self.h_gen.Fill( genSD.M() )                    
                     self.h_reco.Fill( recoSD.M() )
                     self.h_drGenReco.Fill( reco.p4().DeltaR(gen.p4()) )
 
-                    #if recoSD.M() > 10 and genSD.M() > 10 and (genSD.M() / recoSD.M() < 0.5 or genSD.M() / recoSD.M() > 2.0) :
-                    if self.verbose:
-                        print '---------------------------------'
-                        print ' reco: %s %8.4f , gen : %s %8.4f ' % (
-                            self.printP4(reco), recoSD.M(),
-                            self.printP4(gen), genSD.M()
-                            )
-                        print 'Z boson:'
-                        print self.printP4( Zboson )
-                        print 'Z candidate:'
-                        print self.printP4( Zcand )
-                        print 'Muons:'
-                        self.printCollection( muons )
-                        print 'Gen jets:'
-                        self.printCollection( genjets )
-                        print 'Gen subjets:'
-                        self.printCollection( gensubjets )
-                        print 'Reco jets:'
-                        self.printCollection( recojets )
-                        print 'Reco subjets:'
-                        self.printCollection( recosubjets )
             if genval == None :
                 self.h_fake.Fill( recoSD.M() )
         # Now loop over gen jets. If not in reco-->gen list,
