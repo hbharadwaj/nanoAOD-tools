@@ -15,9 +15,9 @@ class ZPlusJetsXS(Module):
     def beginJob(self, histFile, histDirName):
         Module.beginJob(self, histFile, histDirName)
         #self.mBin = array.array('d', [0, 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]) #array.array('d', [0, 5, 10, 20, 40, 60, 80, 100 ,150, 200, 350])
-        self.binsGen = array.array('d', [0,10,20,30,40,50]) 
+        self.binsGen = array.array('d', [0, 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]) 
         self.nGen = len(self.binsGen) - 1
-        self.binsDet = array.array('d', [0,5,10,15,20,25,30,35,40,45,50])
+        self.binsDet = array.array('d', [0, 0.5, 1, 3, 5, 7.5, 10, 12.5, 15, 17.5, 20, 22.5, 25, 27.5, 30, 32.5, 35, 37.5, 40, 42.5, 45, 47.5, 50])
         self.nDet = len(self.binsDet) - 1
 
         self.minDPhiZJet = 1.57
