@@ -8,21 +8,35 @@ h_gen = f.Get('zjets/h_gen')
 h_fake = f.Get('zjets/h_fake')
 h_miss = f.Get('zjets/h_miss')
 
-'''
-for i in xrange(h_response.GetNbinsX()):
-	sumj = 0.
-	for j in xrange(h_response.GetNbinsY()):
-		sumj += h_response.GetBinContent(i,j)	
-	if sumj > 0.0:
-		for j in xrange(h_response.GetNbinsY()):
-			h_response.SetBinContent( i, j, h_response.GetBinContent(i,j) / sumj )
-			h_response.SetBinError( i, j,  h_response.GetBinError(i,j) / sumj )
-'''
+#h_response.GetXaxis().SetRangeUser(0,40)
+#h_response.GetYaxis().SetRangeUser(0,40)
+#h_reco.GetXaxis().SetRangeUser(0,40)
+#h_gen.GetXaxis().SetRangeUser(0,40)
+
+## for i in xrange(h_response.GetNbinsX()+1):
+##     sumj = 0.
+##     x = 0
+##     wx = h_response.GetXaxis().GetBinWidth(i)
+##     for j in xrange(h_response.GetNbinsY()+1):
+##         sumj += h_response.GetBinContent(i,j)
+##     if sumj > 0.0:
+##         for j in xrange(h_response.GetNbinsY()+1):
+##             wy = h_response.GetYaxis().GetBinWidth(j)
+##             h_response.SetBinContent( i, j, h_response.GetBinContent(i,j) / sumj )
+##             h_response.SetBinError( i, j,  h_response.GetBinError(i,j) / sumj )
+            
+## for ihist in [h_reco,h_gen,h_fake,h_miss]:    
+##     for i in xrange(ihist.GetNbinsX()+1):        
+##         wx = ihist.GetXaxis().GetBinWidth(i)        
+##         for j in xrange(ihist.GetNbinsY()+1):
+##             wy = ihist.GetYaxis().GetBinWidth(j)
+##             ihist.SetBinContent( i,j, ihist.GetBinContent(i,j)/wx/wy)
+##             ihist.SetBinError( i,j, ihist.GetBinError(i,j)/wx/wy)
 
 #h_reco.Add( h_fake, -1.0 )
 #h_gen.Add( h_miss, -1.0 )
 
-tunfolder = ROOT.TUnfoldDensity(h_response,ROOT.TUnfold.kHistMapOutputHoriz,ROOT.TUnfold.kRegModeNone, ROOT.TUnfold.kEConstraintNone, ROOT.TUnfoldDensity.kDensityModeBinWidth) 
+tunfolder = ROOT.TUnfoldDensity(h_response,ROOT.TUnfold.kHistMapOutputVert,ROOT.TUnfold.kRegModeNone, ROOT.TUnfold.kEConstraintNone, ROOT.TUnfoldDensity.kDensityModeBinWidth) 
 tunfolder.SetInput( h_reco )
 
 #scanResult = ROOT.TSpline3()

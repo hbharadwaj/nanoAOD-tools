@@ -14,28 +14,31 @@ class ZPlusJetsXS(Module):
         self.verbose = False
     def beginJob(self, histFile, histDirName):
         Module.beginJob(self, histFile, histDirName)
-        self.mBin = array.array('d', [0, 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]) #array.array('d', [0, 5, 10, 20, 40, 60, 80, 100 ,150, 200, 350])
-        self.nbinsm = len(self.mBin) - 1
-        self.mBinB = array.array('d', [0, 0.5, 1, 3, 5, 7.5, 10, 15, 20,30, 40,50, 60, 70, 80, 90,100 ,125,150,175, 200,225, 250,275, 300, 325,350])
-        self.nbinsmB = len(self.mBinB) - 1
+        #self.mBin = array.array('d', [0, 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]) #array.array('d', [0, 5, 10, 20, 40, 60, 80, 100 ,150, 200, 350])
+        self.binsGen = array.array('d', [0,10,20,30,40,50]) 
+        self.nGen = len(self.binsGen) - 1
+        self.binsDet = array.array('d', [0,5,10,15,20,25,30,35,40,45,50])
+        self.nDet = len(self.binsDet) - 1
 
-        self.minDPhiZJet = 2.0
+        self.minDPhiZJet = 1.57
         self.minZpt = 120.
         self.minJetPt = 220.
         
-        #self.addObject( ROOT.TH2F('h_response',   'h_response',   self.nbinsmB, self.mBinB, self.nbinsm, self.mBin) )
-        self.addObject( ROOT.TH2F('h_response',   'h_response',   self.nbinsm, self.mBin, self.nbinsm, self.mBin) )
-        self.addObject( ROOT.TH1F('h_reco',   'h_reco',   self.nbinsm, self.mBin) )
-        self.addObject( ROOT.TH1F('h_gen',    'h_gen',    self.nbinsm, self.mBin) )
-        self.addObject( ROOT.TH1F('h_fake',   'h_fake',   self.nbinsm, self.mBin) )
-        self.addObject( ROOT.TH1F('h_miss',   'h_miss',   self.nbinsm, self.mBin) )
-        self.addObject( ROOT.TH1F('h_zpt', 'h_zpt', 100, 0, 500 ) )
-        self.addObject( ROOT.TH1F('h_zmass', 'h_zmass', 100, 50, 150 ) )
-        self.addObject( ROOT.TH1F('h_genjetpt', 'h_genjetpt', 100, 0, 500 ) )
-        self.addObject( ROOT.TH1F('h_recojetpt', 'h_recojetpt', 100, 0, 500 ) )
+        self.addObject( ROOT.TH2D('h_response',     'h_response',   self.nDet, self.binsDet, self.nGen, self.binsGen) )
+        self.addObject( ROOT.TH2D('h_response_u',   'h_response_u', self.nDet, self.binsDet, self.nGen, self.binsGen) )
+        self.addObject( ROOT.TH1D('h_reco',         'h_reco',       self.nDet, self.binsDet) )
+        self.addObject( ROOT.TH1D('h_gen',          'h_gen',        self.nGen, self.binsGen) )
+        self.addObject( ROOT.TH1D('h_reco_u',       'h_reco_u',     self.nDet, self.binsDet) )
+        self.addObject( ROOT.TH1D('h_gen_u',        'h_gen_u',      self.nGen, self.binsGen) )
+        self.addObject( ROOT.TH1D('h_fake',         'h_fake',       self.nDet, self.binsDet) )
+        self.addObject( ROOT.TH1D('h_miss',         'h_miss',       self.nGen, self.binsGen) )
+        self.addObject( ROOT.TH1D('h_zpt',          'h_zpt',        100, 0, 500 ) )
+        self.addObject( ROOT.TH1D('h_zmass',        'h_zmass',      100, 50, 150 ) )
+        self.addObject( ROOT.TH1D('h_genjetpt',     'h_genjetpt',   100, 0, 500 ) )
+        self.addObject( ROOT.TH1D('h_recojetpt',    'h_recojetpt',  100, 0, 500 ) )
 
-        self.addObject( ROOT.TH1F('h_drGenReco',    'h_drGenReco',    40, 0, 0.8) )
-        self.addObject( ROOT.TH1F('h_drGenGroomed', 'h_drGenGroomed', 40, 0, 0.8) )
+        self.addObject( ROOT.TH1D('h_drGenReco',    'h_drGenReco',   40, 0, 0.8) )
+        self.addObject( ROOT.TH1D('h_drGenGroomed', 'h_drGenGroomed',40, 0, 0.8) )
                             
     def endJob(self):
         Module.endJob(self)
@@ -106,8 +109,10 @@ class ZPlusJetsXS(Module):
             # Get the groomed gen jets
             for igen,gen in enumerate(genjets):
                 gensubjetsMatched = self.getSubjets( p4=gen.p4(),subjets=gensubjets, dRmax=0.8)
+                for isub,sub in enumerate(gensubjetsMatched) : 
+                    self.h_drGenGroomed.Fill( gen.p4().DeltaR( sub ) )
                 genjetsGroomed[gen] = sum( gensubjetsMatched, ROOT.TLorentzVector() ) if len(gensubjetsMatched) > 0 else None
-                self.h_drGenGroomed.Fill( gen.p4().DeltaR( genjetsGroomed[gen] ) )
+                
             if self.verbose:
                 print '----'
                 print 'opposite-Z genjets:'
@@ -173,27 +178,31 @@ class ZPlusJetsXS(Module):
         # (See below for "misses")
         for reco,gen in recoToGen.iteritems():
             recoSD = recojetsGroomed[reco]
-            if reco == None or recoSD == None :
+            if reco == None :#or recoSD == None :
                 continue
             #self.h_reco.Fill( recoSD.M() )\
-            genval = None
+            genSDVal = None
             if gen != None:
+
+                self.h_response_u.Fill( reco.p4().M(), gen.p4().M() )
+                self.h_reco_u.Fill( reco.p4().M() )
+                self.h_gen_u.Fill( gen.p4().M() )
+                
                 genSD = genjetsGroomed[gen]
-                if genSD != None:
+                if recoSD != None and genSD != None:
                     if self.verbose : 
                         print ' reco: %s %8.4f, gen : %s %8.4f ' % (
                             self.printP4(reco), recoSD.M(), 
                             self.printP4(gen), genSD.M()
                             )
-                    genval = genSD.M()
+                    genSDVal = genSD.M()
                     self.h_genjetpt.Fill( gen.p4().Perp() )
                     self.h_recojetpt.Fill( reco.p4().Perp() )
-                    self.h_response.Fill( genSD.M(), recoSD.M() )
+                    self.h_response.Fill( recoSD.M(), genSD.M() )
                     self.h_gen.Fill( genSD.M() )                    
                     self.h_reco.Fill( recoSD.M() )
                     self.h_drGenReco.Fill( reco.p4().DeltaR(gen.p4()) )
-
-            if genval == None :
+            if genSDVal == None and recoSD != None :
                 self.h_fake.Fill( recoSD.M() )
         # Now loop over gen jets. If not in reco-->gen list,
         # then we have a "miss"
@@ -202,8 +211,8 @@ class ZPlusJetsXS(Module):
                 genSD = genjetsGroomed[gen]
                 if genSD == None :
                     continue
-                #self.h_response.Fill( genSD.M(), -1.0 )
-                #self.h_gen.Fill( genSD.M() )
+                self.h_response.Fill( -1.0, genSD.M() )
+                self.h_gen.Fill( genSD.M() )
                 self.h_miss.Fill( genSD.M() )
 
         return True
