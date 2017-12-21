@@ -8,7 +8,7 @@ h_gen = f.Get('zjets/h_gen')
 h_fake = f.Get('zjets/h_fake')
 h_miss = f.Get('zjets/h_miss')
 
-
+'''
 for i in xrange(h_response.GetNbinsX()):
 	sumj = 0.
 	for j in xrange(h_response.GetNbinsY()):
@@ -17,7 +17,7 @@ for i in xrange(h_response.GetNbinsX()):
 		for j in xrange(h_response.GetNbinsY()):
 			h_response.SetBinContent( i, j, h_response.GetBinContent(i,j) / sumj )
 			h_response.SetBinError( i, j,  h_response.GetBinError(i,j) / sumj )
-
+'''
 
 #h_reco.Add( h_fake, -1.0 )
 #h_gen.Add( h_miss, -1.0 )

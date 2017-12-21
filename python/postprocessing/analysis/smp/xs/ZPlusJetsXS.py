@@ -29,6 +29,10 @@ class ZPlusJetsXS(Module):
         self.addObject( ROOT.TH1F('h_gen',    'h_gen',    self.nbinsm, self.mBin) )
         self.addObject( ROOT.TH1F('h_fake',   'h_fake',   self.nbinsm, self.mBin) )
         self.addObject( ROOT.TH1F('h_miss',   'h_miss',   self.nbinsm, self.mBin) )
+        self.addObject( ROOT.TH1F('h_zpt', 'h_zpt', 100, 0, 500 ) )
+        self.addObject( ROOT.TH1F('h_zmass', 'h_zmass', 100, 50, 150 ) )
+        self.addObject( ROOT.TH1F('h_jetpt', 'h_jetpt', 100, 0, 500 ) )
+                            
         self.addObject( ROOT.TH1F('h_drGenReco',    'h_drGenReco',    40, 0, 0.8) )
         self.addObject( ROOT.TH1F('h_drGenGroomed', 'h_drGenGroomed', 40, 0, 0.8) )
                             
@@ -68,12 +72,11 @@ class ZPlusJetsXS(Module):
 
         if isMC:
             ###### Get gen Z candidate #######
-            allgen = Collection(event, "GenPart")
-            zbosons = [ x for x in allgen if abs(x.pdgId) == 23 ]
-            genmuons = [ x for x in allgen if abs(x.pdgId) == 13 ]
-            if len(zbosons) == 0 :
-                return False
-            Zboson = zbosons[ len(zbosons)-1]
+            genleptons = Collection(event, "GenDressedLepton")
+
+            if len(genleptons) < 2 :
+                return False            
+            Zboson = genleptons[0].p4() + genleptons[1].p4()
             if Zboson.p4().Perp() < self.minZpt * 0.9 :
                 return False
             if self.verbose:
@@ -114,7 +117,7 @@ class ZPlusJetsXS(Module):
         if len(muons) < 2 :
             return False
         Zcand = muons[0].p4() + muons[1].p4()
-        if Zcand.Perp() < self.minZpt or Zcand.M() < 50. or Zcand.M() > 120. :
+        if Zcand.Perp() < self.minZpt or Zcand.M() < 50. or Zcand.M() > 150. :
             return False
         if self.verbose:
             print '-----'
