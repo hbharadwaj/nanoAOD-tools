@@ -21,6 +21,7 @@ class ZPlusJetsXS(Module):
 
         self.minDPhiZJet = 2.0
         self.minZpt = 200.
+        self.minJetPt = 220.
         
         #self.addObject( ROOT.TH2F('h_response',   'h_response',   self.nbinsmB, self.mBinB, self.nbinsm, self.mBin) )
         self.addObject( ROOT.TH2F('h_response',   'h_response',   self.nbinsm, self.mBin, self.nbinsm, self.mBin) )
@@ -86,7 +87,7 @@ class ZPlusJetsXS(Module):
                 print '-----'
                 print 'all genjets:'
                 self.printCollection( allgenjets )
-            genjets = [ x for x in allgenjets if x.p4().Perp() > 150. and x.p4().DeltaPhi( Zboson.p4() ) > self.minDPhiZJet ]
+            genjets = [ x for x in allgenjets if x.p4().Perp() > self.minJetPt * 0.5 and x.p4().DeltaPhi( Zboson.p4() ) > self.minDPhiZJet ]
             # List of gen subjets (no direct link from Genjet):
             gensubjets = list(Collection(event, "SubGenJetAK8"))
             # Dictionary to hold ungroomed-->groomed for gen
@@ -126,7 +127,7 @@ class ZPlusJetsXS(Module):
             print '----'
             print 'all recojets:'
             self.printCollection( allrecojets )
-        recojets = [ x for x in allrecojets if x.p4().Perp() > 200. and x.p4().DeltaPhi( Zcand ) > self.minDPhiZJet ]
+        recojets = [ x for x in allrecojets if x.p4().Perp() > self.minJetPt and x.p4().DeltaPhi( Zcand ) > self.minDPhiZJet ]
         if isMC == False:
             genjets = [None] * len(recojets)
         # List of reco subjets:
