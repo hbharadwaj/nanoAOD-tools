@@ -8,7 +8,7 @@ from PhysicsTools.NanoAODTools.postprocessing.tools import *
 import random
 import array
 
-class ZPlusJetsXS(Module):
+class ZPlusJetsXS_2D(Module):
     def __init__(self ):
         self.writeHistFile = True
         self.verbose = False
@@ -25,9 +25,19 @@ class ZPlusJetsXS(Module):
         self.nDetSD = 18
         self.nGenSD = 9
 
-        self.minDPhiZJet = 1.57
-        self.minZpt = 120.
-        self.minJetPt = 220.
+
+        self.minMu0pt = 20.
+        self.minMu1pt = 20.
+        self.minZpt = 100.
+        self.minZmass = 60.
+        self.maxZmass = 120.
+
+        self.minDPhiZJet = 1.57   
+
+        self.minJetPt = 170.
+
+        self.maxObjEta = 2.5
+
 
         self.addObject( ROOT.TUnfoldBinning("detectorBinning") )
         self.detectorDistribution=self.detectorBinning.AddBinning("detectorDistribution")
@@ -80,10 +90,28 @@ class ZPlusJetsXS(Module):
         #self.addObject( self.backgroundBinning.CreateHistogram("h_fake") )
         self.addObject( ROOT.TUnfoldBinning.CreateHistogramOfMigrations(self.generatorBinning,self.detectorBinning,"h_response") )
         
+        self.addObject( ROOT.TH1D('h_lep0pt',          'h_lep0pt',        40, 0, 200 ) )
+        self.addObject( ROOT.TH1D('h_lep0eta',         'h_lep0eta',      48, -3, 3 ) )
+        self.addObject( ROOT.TH1D('h_lep0phi',         'h_lep0phi',      100, -5, 5 ) )
+
+        self.addObject( ROOT.TH1D('h_lep1pt',          'h_lep1pt',        40, 0, 200 ) )
+        self.addObject( ROOT.TH1D('h_lep1eta',         'h_lep1eta',      48, -3, 3 ) )
+        self.addObject( ROOT.TH1D('h_lep1phi',         'h_lep1phi',      100, -5, 5 ) )
+
         self.addObject( ROOT.TH1D('h_zpt',          'h_zpt',        100, 0, 500 ) )
+        self.addObject( ROOT.TH1D('h_zeta',         'h_zeta',      48, -3, 3 ) )
+        self.addObject( ROOT.TH1D('h_zphi',         'h_zphi',      100, -5, 5 ) )
         self.addObject( ROOT.TH1D('h_zmass',        'h_zmass',      100, 50, 150 ) )
-        self.addObject( ROOT.TH1D('h_genjetpt',     'h_genjetpt',   100, 0, 500 ) )
-        self.addObject( ROOT.TH1D('h_recojetpt',    'h_recojetpt',  100, 0, 500 ) )
+
+        self.addObject( ROOT.TH1D('h_genjetpt',          'h_genjetpt',   100, 0, 500 ) )
+        self.addObject( ROOT.TH1D('h_genjeteta',         'h_genjeteta',      48, -3, 3 ) )
+        self.addObject( ROOT.TH1D('h_genjetphi',         'h_genjetphi',      100, -5, 5 ) )
+        self.addObject( ROOT.TH1D('h_genjetmass',        'h_genjetmass',      300, 0, 300 ) )
+
+        self.addObject( ROOT.TH1D('h_recojetpt',          'h_recojetpt',  100, 0, 500 ) )
+        self.addObject( ROOT.TH1D('h_recojeteta',         'h_recojeteta',      48, -3, 3 ) )
+        self.addObject( ROOT.TH1D('h_recojetphi',         'h_recojetphi',      100, -5, 5 ) )
+        self.addObject( ROOT.TH1D('h_recojetmass',        'h_recojetmass',      300, 0, 300 ) )
 
         self.addObject( ROOT.TH1D('h_drGenReco',    'h_drGenReco',   40, 0, 0.8) )
         self.addObject( ROOT.TH1D('h_drGenGroomed', 'h_drGenGroomed',40, 0, 0.8) )
@@ -130,12 +158,14 @@ class ZPlusJetsXS(Module):
                 return False
             if abs(genleptons[0].pdgId) != 13 :
                 return False
+            if genleptons[0].p4().Perp() < self.minMu0pt * 0.9 or   genleptons[1].p4().Perp() < self.minMu1pt * 0.9 or abs(genleptons[1].p4().Eta()) > self.maxObjEta or  abs(genleptons[0].p4().Eta()) > self.maxObjEta:
+                return False                
             if self.verbose :
                 print '----'
                 print 'Gen leptons:'
                 self.printCollection( genleptons )
             Zboson = genleptons[0].p4() + genleptons[1].p4()
-            if Zboson.Perp() < self.minZpt * 0.9 :
+            if Zboson.Perp() < self.minZpt * 0.9  or Zboson.M() < self.minZmass or Zboson.M() > self.maxZmass:
                 return False
             if self.verbose:
                 print '-----'
@@ -149,7 +179,7 @@ class ZPlusJetsXS(Module):
                 print '-----'
                 print 'all genjets:'
                 self.printCollection( allgenjets )
-            genjets = [ x for x in allgenjets if x.p4().Perp() > self.minJetPt * 0.8 and x.p4().DeltaPhi( Zboson ) > self.minDPhiZJet ]
+            genjets = [ x for x in allgenjets if x.p4().Perp() > self.minJetPt * 0.8 and x.p4().DeltaPhi( Zboson ) > self.minDPhiZJet and abs(x.p4().Eta()) < self.maxObjEta  ]
             # List of gen subjets (no direct link from Genjet):
             gensubjets = list(Collection(event, "SubGenJetAK8"))
             # Dictionary to hold ungroomed-->groomed for gen
@@ -174,14 +204,25 @@ class ZPlusJetsXS(Module):
         # List of reco muons
         allmuons = Collection(event, "Muon")
         # Select reco muons:
-        muons = [ x for x in allmuons if x.tightId ]
+        muons = [ x for x in allmuons if (x.tightId and  x.p4().Perp() > self.minMu0pt and abs(x.p4().Eta()) < self.maxObjEta)]
         if len(muons) < 2 :
             return False
         Zcand = muons[0].p4() + muons[1].p4()
-        if Zcand.Perp() < self.minZpt or Zcand.M() < 50. or Zcand.M() > 150. :
+        if Zcand.Perp() < self.minZpt or Zcand.M() < self.minZmass or Zcand.M() > self.maxZmass :
             return False
+
+        self.h_lep0pt.Fill(muons[0].p4().Perp())
+        self.h_lep0eta.Fill(muons[0].p4().Eta())
+        self.h_lep0phi.Fill(muons[0].p4().Phi())
+
+        self.h_lep1pt.Fill(muons[1].p4().Perp())
+        self.h_lep1eta.Fill(muons[1].p4().Eta())
+        self.h_lep1phi.Fill(muons[1].p4().Phi())
+
         self.h_zpt.Fill( Zcand.Perp() )
         self.h_zmass.Fill( Zcand.M() )
+        self.h_zeta.Fill( Zcand.Eta() )
+        self.h_zphi.Fill( Zcand.Phi() )
         if self.verbose:
             print '-----'
             print ' recoZ:', self.printP4( Zcand )
@@ -193,7 +234,7 @@ class ZPlusJetsXS(Module):
             print '----'
             print 'all recojets:'
             self.printCollection( allrecojets )
-        recojets = [ x for x in allrecojets if x.p4().Perp() > self.minJetPt and x.p4().DeltaPhi( Zcand ) > self.minDPhiZJet ]
+        recojets = [ x for x in allrecojets if x.p4().Perp() > self.minJetPt and x.p4().DeltaPhi( Zcand ) > self.minDPhiZJet and abs(x.p4().Eta()) < self.maxObjEta ]
         if isMC == False:
             genjets = [None] * len(recojets)
         # List of reco subjets:
@@ -237,7 +278,17 @@ class ZPlusJetsXS(Module):
             genSDVal = None
             if gen != None:
                 self.h_genjetpt.Fill( gen.p4().Perp() )
-                self.h_recojetpt.Fill( reco.p4().Perp() )
+                self.h_genjeteta.Fill( gen.p4().Eta() )
+                self.h_genjetphi.Fill( gen.p4().Phi() )
+                self.h_genjetmass.Fill( gen.p4().M()  )
+
+
+                self.h_recojetpt.Fill(   reco.p4().Perp() )
+                self.h_recojeteta.Fill(  reco.p4().Eta()  )
+                self.h_recojetphi.Fill(  reco.p4().Phi()  )
+                self.h_recojetmass.Fill( reco.p4().M()    )
+
+
                 self.h_drGenReco.Fill( reco.p4().DeltaR(gen.p4()) )
 
                 genSD = genjetsGroomed[gen]

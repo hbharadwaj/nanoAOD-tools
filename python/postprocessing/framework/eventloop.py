@@ -34,7 +34,7 @@ class Module:
         pass
     def addObject(self, obj ):
         setattr( self, obj.GetName(), obj )
-        self.objs.append( getattr( self, obj.GetName() ) )
+        self.obj.append( getattr( self, obj.GetName() ) )
         
 
 def eventLoop(modules, inputFile, outputFile, inputTree, wrappedOutputTree, maxEvents=-1, eventRange=None, progress=(10000,sys.stdout), filterOutput=True): 
