@@ -14,13 +14,13 @@ class ZPlusJetsXS_2D(Module):
         self.verbose = False
     def beginJob(self, histFile, histDirName):
         Module.beginJob(self, histFile, histDirName)
-        self.ptbinsGen = array.array('d', [  200., 260., 350., 460., 550., 650., 760., 900, 1000, 1100, 1200, 1300, 13000.])
-        self.ptbinsDet = array.array('d', [  200., 260., 350., 460., 550., 650., 760., 900, 1000, 1100, 1200, 1300, 13000.])
+        self.ptbinsGen = array.array('d', [  200., 260., 350., 460., 550., 650., 760., 900., 1000., 1100., 1200., 1300., 13000.])
+        self.ptbinsDet = array.array('d', [  200., 260., 350., 460., 550., 650., 760., 900., 1000., 1100., 1200., 1300., 13000.])
         self.nptbinsGen = 4
         self.nptbinsDet = 4
-        self.binsGen = array.array('d', [0, 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 100]) 
+        self.binsGen = array.array('d', [0., 1., 5., 10., 15., 20., 25., 30., 35., 40., 45., 50., 100.]) 
         self.nGen = len(self.binsGen) - 1
-        self.binsDet = array.array('d', [0, 0.5, 1, 3, 5, 7.5, 10, 12.5, 15, 17.5, 20, 22.5, 25, 27.5, 30, 32.5, 35, 37.5, 40, 42.5, 45, 47.5, 50, 75., 100.])
+        self.binsDet = array.array('d', [0., 0.5, 1., 3., 5., 7.5, 10., 12.5, 15., 17.5, 20., 22.5, 25., 27.5, 30., 32.5, 35., 37.5, 40., 42.5, 45., 47.5, 50., 75., 100.])
         self.nDet = len(self.binsDet) - 1
         self.nDetSD = 18
         self.nGenSD = 9
@@ -327,4 +327,4 @@ class ZPlusJetsXS_2D(Module):
         return True
 # define modules using the syntax 'name = lambda : constructor' to avoid having them loaded when not needed
 
-zplusjetsxs = lambda : ZPlusJetsXS() 
+zplusjetsxs = lambda : ZPlusJetsXS_2D() 

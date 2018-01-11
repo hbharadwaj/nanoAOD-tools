@@ -23,8 +23,8 @@ lfnList = [ dic['logical_file_name'] for dic in fileDictList ]
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'XmasNanoAOD_DY1_test2'
-config.General.transferLogs= False #True
+config.General.requestName = 'XmasNanoAOD_DY1_testing0'
+config.General.transferLogs= True
 config.section_("JobType")
 config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = 'PSet.py'
@@ -45,9 +45,9 @@ config.Data.unitsPerJob = 1
 #config.Data.unitsPerJob = 1 #100
 #config.Data.totalUnits = 2000
 #config.Data.inputDBS='phys03'
-config.Data.outLFNDirBase = '/store/user/asparker/XmasNanoAOD/'
+config.Data.outLFNDirBase = '/store/user/asparker/Xmas_NanoAOD/'
 config.Data.publication = False #True
-config.Data.outputDatasetTag = 'XmasNanoTestPost2'
+config.Data.outputDatasetTag = 'XmasNanoPost'
 config.section_("Site")
 #config.Site.storageSite = "T3_US_FNALLPC"
 
