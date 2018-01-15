@@ -15,6 +15,9 @@ class TTbar_SemiLep(Module):
     def beginJob(self, histFile, histDirName):
         Module.beginJob(self, histFile, histDirName)
 
+        self.isttbar = False
+        if 'TTJets_' in histFile :
+           self.isttbar = True 
 
         self.minMupt = 53.
         self.maxMuEta = 2.1
@@ -94,10 +97,23 @@ class TTbar_SemiLep(Module):
         self.addObject( ROOT.TH1D('h_genjetphi',         'h_genjetphi',      100, -5, 5 ) )
         self.addObject( ROOT.TH1D('h_genjetmass',        'h_genjetmass',      300, 0, 300 ) )
 
-        self.addObject( ROOT.TH1D('h_recojetpt',          'h_recojetpt',  100, 0, 500 ) )
-        self.addObject( ROOT.TH1D('h_recojeteta',         'h_recojeteta',      48, -3, 3 ) )
-        self.addObject( ROOT.TH1D('h_recojetphi',         'h_recojetphi',      100, -5, 5 ) )
-        self.addObject( ROOT.TH1D('h_recojetmass',        'h_recojetmass',      300, 0, 300 ) )
+        self.addObject( ROOT.TH1D('h_recoAK8jetpt',          'h_recoAK8jetpt',  100, 0, 500 ) )
+        self.addObject( ROOT.TH1D('h_recoAK8jeteta',         'h_recoAK8jeteta',      48, -3, 3 ) )
+        self.addObject( ROOT.TH1D('h_recoAK8jetphi',         'h_recoAK8jetphi',      100, -5, 5 ) )
+        self.addObject( ROOT.TH1D('h_recoAK8jetmass',        'h_recoAK8jetmass',      300, 0, 300 ) )
+
+        if self.isttbar :
+            self.addObject( ROOT.TH1D('h_matchedAK8jetpt',          'h_matchedAK8jetpt',      100, 0, 500 ) )
+            self.addObject( ROOT.TH1D('h_matchedAK8jeteta',         'h_matchedAK8jeteta',      48, -3, 3 ) )
+            self.addObject( ROOT.TH1D('h_matchedAK8jetphi',         'h_matchedAK8jetphi',      100, -5, 5 ) )
+            self.addObject( ROOT.TH1D('h_matchedAK8jetmass',        'h_matchedAK8jetmass',      300, 0, 300 ) )
+
+            self.addObject( ROOT.TH1D('h_unmatchedAK8jetpt',          'h_unmatchedAK8jetpt',      100, 0, 500 ) )
+            self.addObject( ROOT.TH1D('h_unmatchedAK8jeteta',         'h_unmatchedAK8jeteta',      48, -3, 3 ) )
+            self.addObject( ROOT.TH1D('h_unmatchedAK8jetphi',         'h_unmatchedAK8jetphi',      100, -5, 5 ) )
+            self.addObject( ROOT.TH1D('h_unmatchedAK8jetmass',        'h_unmatchedAK8jetmass',      300, 0, 300 ) )
+
+
 
         self.addObject( ROOT.TH1D('h_drGenReco',    'h_drGenReco',   40, 0, 0.8) )
         self.addObject( ROOT.TH1D('h_drGenGroomed', 'h_drGenGroomed',40, 0, 0.8) )
@@ -265,6 +281,12 @@ class TTbar_SemiLep(Module):
             # Now check ungroomed gen
             genSDVal = None
             if gen != None:
+                if self.isttbar :
+                    self.h_matchedAK8jetpt.Fill(recoSD.Perp())
+                    self.h_matchedAK8jeteta.Fill(recoSD.Eta())
+                    self.h_matchedAK8jetphi.Fill(recoSD.Phi())
+                    self.h_matchedAK8jetmass.Fill(recoSD.M())
+                    
                 self.h_drGenReco.Fill( reco.p4().DeltaR(gen.p4()) )
 
                 genSD = genjetsGroomed[gen]
@@ -277,11 +299,14 @@ class TTbar_SemiLep(Module):
                             self.printP4(gen), genSD.M()
                             )
 
-            else :
+            elif  :
                 # Here we have a groomed det, but no groomed gen
                 if genSDVal == None and recoSD != None :
-
-
+                    if self.isttbar :
+                        self.h_unmatchedAK8jetpt.Fill(recoSD.Perp())
+                        self.h_unmatchedAK8jeteta.Fill(recoSD.Eta())
+                        self.h_unmatchedAK8jetphi.Fill(recoSD.Phi())
+                        self.h_unmatchedAK8jetmass.Fill(recoSD.M())
 
         return True
 # define modules using the syntax 'name = lambda : constructor' to avoid having them loaded when not needed
