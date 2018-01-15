@@ -4,6 +4,12 @@ from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import *
 import sys
 import re
 import PSet
+import submit_all
+
+def requestName():
+    crabname = submit_all.config.Data.outputDatasetTag   
+    return crabname 
+
 
 def inputFiles():
    print "ARGV:",sys.argv
