@@ -298,7 +298,6 @@ class TTbar_SemiLep(Module):
                             self.printP4(reco), recoSD.M(), 
                             self.printP4(gen), genSD.M()
                             )
-
             elif  :
                 # Here we have a groomed det, but no groomed gen
                 if genSDVal == None and recoSD != None :
