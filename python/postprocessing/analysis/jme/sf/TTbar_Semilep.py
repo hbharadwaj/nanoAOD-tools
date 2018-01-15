@@ -298,14 +298,14 @@ class TTbar_SemiLep(Module):
                             self.printP4(reco), recoSD.M(), 
                             self.printP4(gen), genSD.M()
                             )
-            elif  :
+
+            elif  self.isttbar :
                 # Here we have a groomed det, but no groomed gen
                 if genSDVal == None and recoSD != None :
-                    if self.isttbar :
-                        self.h_unmatchedAK8jetpt.Fill(recoSD.Perp())
-                        self.h_unmatchedAK8jeteta.Fill(recoSD.Eta())
-                        self.h_unmatchedAK8jetphi.Fill(recoSD.Phi())
-                        self.h_unmatchedAK8jetmass.Fill(recoSD.M())
+                    self.h_unmatchedAK8jetpt.Fill(recoSD.Perp())
+                    self.h_unmatchedAK8jeteta.Fill(recoSD.Eta())
+                    self.h_unmatchedAK8jetphi.Fill(recoSD.Phi())
+                    self.h_unmatchedAK8jetmass.Fill(recoSD.M())
 
         return True
 # define modules using the syntax 'name = lambda : constructor' to avoid having them loaded when not needed
