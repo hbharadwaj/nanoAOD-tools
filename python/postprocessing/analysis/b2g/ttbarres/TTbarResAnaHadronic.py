@@ -10,13 +10,14 @@ from PhysicsTools.NanoAODTools.postprocessing.tools import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.JetSysColl import JetSysColl, JetSysObj
 
 import random
+import itertools
 ROOT.gSystem.Load('libAnalysisPredictedDistribution')
 
 """@TTbarResAnaHadronic Package to perform the data-driven mistag-rate-based ttbar hadronic analysis. 
 
 This module must be run twice: first to make the mistag rate in the "anti-tag and probe" selection,
-and then applies that mistag rate to the single-tag selection. These are all done in
-b-tag categories (0, 1, >=2). 
+and then applies that mistag rate to the single-tag selection. These are all done in bins of
+b-tag categories (0, 1, >=2) and rapidity (|y| <= 1.0, |y| > 1.0).
 The signal region is two top-tagged jets. 
 The background estimate is the single-tag selection weighted by the mistag rate from the
 "anti-tag and probe" region. 
@@ -59,19 +60,26 @@ class TTbarResAnaHadronic(Module):
             'jms_up', 'jms_dn',
             'jmr_up', 'jmr_dn'
             ]
-        self.btagcats = ["0b", "1b", "2b"]
+        self.btagcats = ["0b", "1b", "2b"]   # 0, 1, >=2 btags
+        self.ycats = ['cen', 'fwd']          # Central and forward
+        # Combine categories like "0bcen", "0bfwd", etc:
+        self.anacats = [ b+y for b,y in itertools.product( self.btagcats, self.ycats) ]
         # Make string-based enumeration into aliases for faster processing speed
         self.systvals = []
         for isys,sys in enumerate(self.systs):
             setattr( self, sys, isys)
             self.systvals.append( getattr(self,sys) )
-        self.btagcatvals = []        
-        for ibcat,bcat in enumerate(self.btagcats):
-            setattr( self, bcat, ibcat )
-            self.btagcatvals.append( getattr(self,bcat) )
-        
+        self.anacatvals = []        
+        for ianacat,anacat in enumerate(self.anacats):
+            setattr( self, anacat, ianacat )
+            self.anacatvals.append( getattr(self,anacat) )
 
-        
+    def formcat(self, nbtag, ycat ):
+        """Form analysis category based on nbtag and ycat.
+
+        """
+        anacat = nbtag * len(self.ycats) + ycat
+        return anacat
         
     def beginJob(self, histFile, histDirName):
         """Book control histograms and the predictions for the background.
@@ -92,25 +100,25 @@ class TTbarResAnaHadronic(Module):
             self.predFile = ROOT.TFile( "ttbarreshad_predfile.root" )
             self.hpred = [ self.predFile.Get( "ttbarres/preddist" + str(ibtag) ) for ibtag in xrange(len(self.btagcatvals))]
             # PredictedDistribution needs to own this to ensure it doesn't go out of scope.
-            for ibtag in xrange(len(self.btagcatvals)) :
-                ROOT.SetOwnership( self.hpred[ibtag], False )
-                self.addObject( ROOT.PredictedDistribution(self.hpred[ibtag], "predJetP"+str(ibtag),        "Jet p_{T} (GeV), nbtag="+str(ibtag),   30, 0.0, 3000.) )
-                self.addObject( ROOT.PredictedDistribution(self.hpred[ibtag], "predJetMTTBAR"+str(ibtag),   "M_{TTBAR} (GeV), nbtag="+str(ibtag),   50, 0.0, 5000.))
-                self.addObject( ROOT.PredictedDistribution(self.hpred[ibtag], "predJetMTTBARMod"+str(ibtag),"M_{TTBAR} (GeV), nbtag="+str(ibtag),   50, 0.0, 5000.))
-                self.addObject( ROOT.PredictedDistribution(self.hpred[ibtag], "predJetSDMass"+str(ibtag),    "Soft Drop Mass, nbtag="+str(ibtag),   50, 0.0, 250.))
-                self.addObject( ROOT.PredictedDistribution(self.hpred[ibtag], "predJetMass"+str(ibtag),  "Ungroomed Jet Mass, nbtag="+str(ibtag),   50, 0.0, 250.))
-                self.addObject( ROOT.PredictedDistribution(self.hpred[ibtag], "predJetMassMod"+str(ibtag), "Ungroomed Jet Mass, nbtag="+str(ibtag), 50, 0.0, 250.))
-                self.addObject( ROOT.PredictedDistribution(self.hpred[ibtag], "predJetSDRho"+str(ibtag),        "Soft Drop Rho, nbtag="+str(ibtag), 50, 0.0, 1.))
-            self.predJetP         = [ getattr( self, "predJetP"         + str (ibtag)) for ibtag in xrange(len(self.btagcatvals))]
-            self.predJetMTTBAR    = [ getattr( self, "predJetMTTBAR"    + str (ibtag)) for ibtag in xrange(len(self.btagcatvals))]
-            self.predJetMTTBARMod = [ getattr( self, "predJetMTTBARMod" + str (ibtag)) for ibtag in xrange(len(self.btagcatvals))]
-            self.predJetSDMass    = [ getattr( self, "predJetSDMass"    + str (ibtag)) for ibtag in xrange(len(self.btagcatvals))]
-            self.predJetMass      = [ getattr( self, "predJetMass"      + str (ibtag)) for ibtag in xrange(len(self.btagcatvals))]
-            self.predJetMassMod   = [ getattr( self, "predJetMassMod"   + str (ibtag)) for ibtag in xrange(len(self.btagcatvals))]
-            self.predJetSDRho     = [ getattr( self, "predJetSDRho"     + str (ibtag)) for ibtag in xrange(len(self.btagcatvals))]
+            for iana in xrange(len(self.anacatvals)) :
+                ROOT.SetOwnership( self.hpred[iana], False )
+                self.addObject( ROOT.PredictedDistribution(self.hpred[iana], "predJetP"+str(iana),        "Jet p_{T} (GeV), cat="+str(iana),   30, 0.0, 3000.) )
+                self.addObject( ROOT.PredictedDistribution(self.hpred[iana], "predJetMTTBAR"+str(iana),   "M_{TTBAR} (GeV), cat="+str(iana),   50, 0.0, 5000.))
+                self.addObject( ROOT.PredictedDistribution(self.hpred[iana], "predJetMTTBARMod"+str(iana),"M_{TTBAR} (GeV), cat="+str(iana),   50, 0.0, 5000.))
+                self.addObject( ROOT.PredictedDistribution(self.hpred[iana], "predJetSDMass"+str(iana),    "Soft Drop Mass, cat="+str(iana),   50, 0.0, 250.))
+                self.addObject( ROOT.PredictedDistribution(self.hpred[iana], "predJetMass"+str(iana),  "Ungroomed Jet Mass, cat="+str(iana),   50, 0.0, 250.))
+                self.addObject( ROOT.PredictedDistribution(self.hpred[iana], "predJetMassMod"+str(iana), "Ungroomed Jet Mass, cat="+str(iana), 50, 0.0, 250.))
+                self.addObject( ROOT.PredictedDistribution(self.hpred[iana], "predJetSDRho"+str(iana),        "Soft Drop Rho, cat="+str(iana), 50, 0.0, 1.))
+            self.predJetP         = [ getattr( self, "predJetP"         + str (iana)) for iana in xrange(len(self.anacatvals))]
+            self.predJetMTTBAR    = [ getattr( self, "predJetMTTBAR"    + str (iana)) for iana in xrange(len(self.anacatvals))]
+            self.predJetMTTBARMod = [ getattr( self, "predJetMTTBARMod" + str (iana)) for iana in xrange(len(self.anacatvals))]
+            self.predJetSDMass    = [ getattr( self, "predJetSDMass"    + str (iana)) for iana in xrange(len(self.anacatvals))]
+            self.predJetMass      = [ getattr( self, "predJetMass"      + str (iana)) for iana in xrange(len(self.anacatvals))]
+            self.predJetMassMod   = [ getattr( self, "predJetMassMod"   + str (iana)) for iana in xrange(len(self.anacatvals))]
+            self.predJetSDRho     = [ getattr( self, "predJetSDRho"     + str (iana)) for iana in xrange(len(self.anacatvals))]
 
             # PredictedDistribution needs to own these also.
-            for cat in self.btagcatvals : 
+            for cat in self.anacatvals : 
                 for hist in [
                         self.predJetP[cat], self.predJetMTTBAR[cat],
                         self.predJetMTTBARMod[cat],
@@ -118,15 +126,15 @@ class TTbarResAnaHadronic(Module):
                         self.predJetSDRho[cat] ] : 
                     ROOT.SetOwnership( hist, False )
         else:
-            for ibtag in xrange(len(self.btagcatvals)):
-                self.addObject( ROOT.TH1D("preddist"+str(ibtag), "preddist"+str(ibtag), 25, 0, 2500) )
-            self.preddist = [ getattr( self, "preddist"+str(ibtag)) for ibtag in xrange(len(self.btagcatvals))]
+            for iana in xrange(len(self.anacatvals)):
+                self.addObject( ROOT.TH1D("preddist"+str(iana), "preddist"+str(iana), 25, 0, 2500) )
+            self.preddist = [ getattr( self, "preddist"+str(iana)) for iana in xrange(len(self.anacatvals))]
             
     def endJob(self):
         """Calculate the correlated and uncorrelated errors.
         """
         if not self.writePredDist:
-            for cat in self.btagcatvals : 
+            for cat in self.anacatvals : 
                 for hist in [
                         self.predJetP[cat], self.predJetMTTBAR[cat],
                         self.predJetMTTBARMod[cat],
@@ -170,25 +178,25 @@ class TTbarResAnaHadronic(Module):
             for ijet, jet in enumerate(jetSysCollAK4.jets_raw()) :
                 if ijet not in jetSysCollAK4[self.nom].keys() :
                     continue
-                jetSysCollAK4[self.nom   ][ijet].p4().SetPtEtaPhiM( jet.pt_nom          , jet.eta, jet.phi, jet.m_nom          )
-                jetSysCollAK4[self.jer_up][ijet].p4().SetPtEtaPhiM( jet.pt_jerUp        , jet.eta, jet.phi, jet.m_jerUp        )
-                jetSysCollAK4[self.jer_dn][ijet].p4().SetPtEtaPhiM( jet.pt_jerDown      , jet.eta, jet.phi, jet.m_jerDown      )
-                jetSysCollAK4[self.jec_up][ijet].p4().SetPtEtaPhiM( jet.pt_jesTotalUp   , jet.eta, jet.phi, jet.m_jesTotalUp   )
-                jetSysCollAK4[self.jec_dn][ijet].p4().SetPtEtaPhiM( jet.pt_jesTotalDown , jet.eta, jet.phi, jet.m_jesTotalDown )
+                jetSysCollAK4[self.nom   ][ijet].p4().SetPtEtaPhiM( jet.pt_nom          , jet.eta, jet.phi, jet.mass_nom          )
+                jetSysCollAK4[self.jer_up][ijet].p4().SetPtEtaPhiM( jet.pt_jerUp        , jet.eta, jet.phi, jet.mass_jerUp        )
+                jetSysCollAK4[self.jer_dn][ijet].p4().SetPtEtaPhiM( jet.pt_jerDown      , jet.eta, jet.phi, jet.mass_jerDown      )
+                jetSysCollAK4[self.jec_up][ijet].p4().SetPtEtaPhiM( jet.pt_jesTotalUp   , jet.eta, jet.phi, jet.mass_jesTotalUp   )
+                jetSysCollAK4[self.jec_dn][ijet].p4().SetPtEtaPhiM( jet.pt_jesTotalDown , jet.eta, jet.phi, jet.mass_jesTotalDown )
 
         if jetSysCollAK8 != None:
             for ijet, jet in enumerate(jetSysCollAK8.jets_raw()) :
                 if ijet not in jetSysCollAK8[self.nom].keys() :
                     continue
-                jetSysCollAK8[self.nom   ][ijet].p4().SetPtEtaPhiM( jet.pt_nom          , jet.eta, jet.phi, jet.m_nom          )
-                jetSysCollAK8[self.jer_up][ijet].p4().SetPtEtaPhiM( jet.pt_jerUp        , jet.eta, jet.phi, jet.m_jerUp        )
-                jetSysCollAK8[self.jer_dn][ijet].p4().SetPtEtaPhiM( jet.pt_jerDown      , jet.eta, jet.phi, jet.m_jerDown      )
-                jetSysCollAK8[self.jec_up][ijet].p4().SetPtEtaPhiM( jet.pt_jesTotalUp   , jet.eta, jet.phi, jet.m_jesTotalUp   )
-                jetSysCollAK8[self.jec_dn][ijet].p4().SetPtEtaPhiM( jet.pt_jesTotalDown , jet.eta, jet.phi, jet.m_jesTotalDown )
-                jetSysCollAK8[self.jmr_up][ijet].p4().SetPtEtaPhiM( jet.pt_nom          , jet.eta, jet.phi, jet.m_jmrUp        )
-                jetSysCollAK8[self.jmr_dn][ijet].p4().SetPtEtaPhiM( jet.pt_nom          , jet.eta, jet.phi, jet.m_jmrDown      )
-                jetSysCollAK8[self.jms_up][ijet].p4().SetPtEtaPhiM( jet.pt_nom          , jet.eta, jet.phi, jet.m_jmsUp        )
-                jetSysCollAK8[self.jms_dn][ijet].p4().SetPtEtaPhiM( jet.pt_nom          , jet.eta, jet.phi, jet.m_jmsDown      )
+                jetSysCollAK8[self.nom   ][ijet].p4().SetPtEtaPhiM( jet.pt_nom          , jet.eta, jet.phi, jet.mass_nom          )
+                jetSysCollAK8[self.jer_up][ijet].p4().SetPtEtaPhiM( jet.pt_jerUp        , jet.eta, jet.phi, jet.mass_jerUp        )
+                jetSysCollAK8[self.jer_dn][ijet].p4().SetPtEtaPhiM( jet.pt_jerDown      , jet.eta, jet.phi, jet.mass_jerDown      )
+                jetSysCollAK8[self.jec_up][ijet].p4().SetPtEtaPhiM( jet.pt_jesTotalUp   , jet.eta, jet.phi, jet.mass_jesTotalUp   )
+                jetSysCollAK8[self.jec_dn][ijet].p4().SetPtEtaPhiM( jet.pt_jesTotalDown , jet.eta, jet.phi, jet.mass_jesTotalDown )
+                jetSysCollAK8[self.jmr_up][ijet].p4().SetPtEtaPhiM( jet.pt_nom          , jet.eta, jet.phi, jet.mass_jmrUp        )
+                jetSysCollAK8[self.jmr_dn][ijet].p4().SetPtEtaPhiM( jet.pt_nom          , jet.eta, jet.phi, jet.mass_jmrDown      )
+                jetSysCollAK8[self.jms_up][ijet].p4().SetPtEtaPhiM( jet.pt_nom          , jet.eta, jet.phi, jet.mass_jmsUp        )
+                jetSysCollAK8[self.jms_dn][ijet].p4().SetPtEtaPhiM( jet.pt_nom          , jet.eta, jet.phi, jet.mass_jmsDown      )
                 
                 jetSysCollAK8[self.nom   ][ijet].msd_ = jet.msoftdrop_nom
                 jetSysCollAK8[self.jer_up][ijet].msd_ = jet.msoftdrop_jerUp                        
@@ -216,14 +224,17 @@ class TTbarResAnaHadronic(Module):
         # Get the collections of AK4 and AK8 jets
         self.ak4JetsColl = Collection(event, "Jet")
         self.ak8JetsColl = Collection(event, "FatJet")
-        # Match AK4 jets to AK8 for jet ID. AK8 does not store the jet ID variables. 
-        matchAK4ToAK8 = matchObjectCollection( self.ak8JetsColl, self.ak4JetsColl )
 
         # Select the jets that satisfy jet ID. 
-        jetSysCollAK4 = JetSysColl(self.ak4JetsColl, self.systvals, sel= lambda x : x.jetId > 0 )
-        jetSysCollAK8 = JetSysColl(self.ak8JetsColl, self.systvals, sel= lambda y : matchAK4ToAK8[y] != None and matchAK4ToAK8[y].jetId > 0 )
+        ak4Jets = [ x for x in self.ak4JetsColl if x.jetId > 0 ]
+        ak8Jets = [ x for x in self.ak8JetsColl if x.jetId > 0 ]
+        if len(ak8Jets) < 2 :
+            return False
         
-        
+        # Make the systematic variations.
+        jetSysCollAK4 = JetSysColl(self.ak4JetsColl, self.systvals, sel = lambda x : x.jetId > 0)
+        jetSysCollAK8 = JetSysColl(self.ak8JetsColl, self.systvals, sel = lambda x : x.jetId > 0)
+                
         # Derive the kinematic systematic effects. In this case,
         # jet-based systematic 4-vectors (AK4: JEC+JER, AK8:JEC+JER+JMS+JMR)
         self.deriveJetSysts(jetSysCollAK4, jetSysCollAK8)
@@ -260,6 +271,8 @@ class TTbarResAnaHadronic(Module):
             isTagged = [ self.passTopTag(ak8JetsSys[x]) for x in ak8JetsNdx ]
             isTaggedDict = dict( zip( ak8JetsNdx ,isTagged) )
 
+            
+
             # Make control plots
             for iak8Jet in ak8JetsNdx:
                 jet = ak8JetsSys[iak8Jet]
@@ -274,9 +287,10 @@ class TTbarResAnaHadronic(Module):
             iprobejet, itagjet = ak8JetsNdx[0:2]
             ttbarP4 =  ak8JetsSys[iprobejet].p4() + ak8JetsSys[itagjet].p4()
 
-            # Find the b-tag category
-            nbtag = min( 2, sum(  ak8JetsSys[x].raw().btagCSVV2 > self.bdisc for x in [iprobejet,itagjet]))
-            
+            # Find the analysis category: (0b,1b,2b) x (y<1,y>1)
+            nbtag = min(2, sum( [ak8JetsSys[x].raw().maxCSVV2 > self.bdisc for x in [iprobejet,itagjet] ] ))
+            yreg = 1 if abs( ak8JetsSys[iprobejet].p4().Rapidity() ) < 1.0 else 0
+            anacat = self.formcat( nbtag, yreg )
 
             # Check if we have >=1 ttag
             if not self.passTopTag(ak8JetsSys[itagjet]) :
@@ -288,14 +302,14 @@ class TTbarResAnaHadronic(Module):
                 else:
                     # Here is the anti-ttag region selection to derive the mistag rate. 
                     if isys == self.nom:
-                        self.preddist[nbtag].Fill( ak8JetsSys[iprobejet].p4().P(), weight )
+                        self.preddist[anacat].Fill( ak8JetsSys[iprobejet].p4().P(), weight )
 
             # Here we have the actual signal region: 
             if not self.writePredDist:
                 # Get the predicted background estimate
                 if isys == self.nom : 
-                    self.predJetP[nbtag].Accumulate( ak8JetsSys[iprobejet].p4().P(), ak8JetsSys[iprobejet].p4().P(), isTaggedDict[iprobejet], weight )
-                    self.predJetMTTBAR[nbtag].Accumulate( ttbarP4.M(), ak8JetsSys[iprobejet].p4().P(), isTaggedDict[iprobejet], weight )
+                    self.predJetP[anacat].Accumulate( ak8JetsSys[iprobejet].p4().P(), ak8JetsSys[iprobejet].p4().P(), isTaggedDict[iprobejet], weight )
+                    self.predJetMTTBAR[anacat].Accumulate( ttbarP4.M(), ak8JetsSys[iprobejet].p4().P(), isTaggedDict[iprobejet], weight )
             # Now fill the double tagged histograms. 
             if isTaggedDict[iprobejet] : 
                 self.h_mttbar[isys].Fill( ttbarP4.M(), weight )
