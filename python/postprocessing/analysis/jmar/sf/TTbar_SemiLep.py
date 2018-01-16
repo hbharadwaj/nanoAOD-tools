@@ -160,7 +160,7 @@ class TTbar_SemiLep(Module):
                 return False
             if abs(genleptons[0].pdgId) != 13 :
                 return False
-            if genleptons[0].p4().Perp() < self.minMu0pt * 0.9 :
+            if genleptons[0].p4().Perp() < self.minMupt * 0.9 :
                 return False
             genAK4s = Collection(event, "GenJet")    # are these Ak4s ?
             genAK4jets = [ x for x in genAK4s if x.p4().Perp() > self.minAK4Pt * 0.8 ]
@@ -169,8 +169,12 @@ class TTbar_SemiLep(Module):
                 print 'Gen leptons:'
                 self.printCollection( genleptons )
 
-            METgen = Collection(event, "GenMET") # this may not be correct syntax
-            WLep = genleptons[0].p4() + METgen[0].p4()
+            METgen_pt = event.GenMET_pt  #Collection(event, "GenMET_pt") # this may not be correct syntax
+            print METgen_pt
+            METgen_phi = event.GenMET_phi #Collection(event, "GenMET_phi") 
+            METgen = ROOT.TLorentzVector()
+            METgen.SetPtEtaPhiMass(METgen_pt[0],0.0,METgen_phi[0], 0.0  )
+            WLep = genleptons[0].p4() + METgen
             if WLep.Perp() < self.minLepWPt * 0.9 :
                 return False
             if self.verbose:

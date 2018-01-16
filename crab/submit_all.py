@@ -119,7 +119,7 @@ def main():
         config.Data.outputDatasetTag = requestname
         if datatier == 'USER':
 
-          config.JobType.psetName = 'PSet.py'
+          config.JobType.psetName = 'PSet_SFs.py'
           print options.cfg[0:-2]+'sh'
           config.JobType.scriptExe = options.cfg[0:-2]+'sh'
           config.JobType.inputFiles = [options.cfg ,'../scripts/haddnano.py'] #hadd nano will not be needed once nano tools are in cmssw                                                                                                                    
