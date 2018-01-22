@@ -22,6 +22,6 @@ files = [ fdir+'DY1JetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8.root']
 import random
 random.seed(12345)
                                                                                                                                                                       
-p1=PostProcessor(".",files,"Jet_pt>200 &&( (nElectrons > 0 && HLT_Ele115_CaloIdVT_GsfTrkIdT) || (nMuons > 0 && HLT_Mu50))","keep_and_drop.txt",[TTbar_SemiLep()],provenance=True,fwkJobReport=True,histFileName='DY1_M-50_TuneCP5-madMLM-pythia8-80xNanoV0-hists.root', histDirName='ttbar_semilept'  , postfix='200GevFatJet')
+p1=PostProcessor(".",files,"Jet_pt>200 && ( (nElectron > 0 && HLT_Ele115_CaloIdVT_GsfTrkIdT) || (nMuon > 0 && HLT_Mu50))","keep_and_drop.txt",[TTbar_SemiLep()],provenance=True,fwkJobReport=True,histFileName='DY1_M-50_TuneCP5-madMLM-pythia8-80xNanoV0-hists.root', histDirName='ttbar_semilept'  , postfix='200GevFatJet')
 
 p1.run()

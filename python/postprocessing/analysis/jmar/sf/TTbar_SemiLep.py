@@ -31,7 +31,7 @@ class TTbar_SemiLep(Module):
         # e.g. h_wpt_ptbin0 1D histogram is for W candidate subjets (most massive SD subjet) with pt 200-300 GeV   
 
         self.minMupt = 53.
-        self.maxMuEta = 2.1
+        self.maxMuEta = 2.4
         self.maxRelIso = 0.1
         self.minMuMETPt = 40.
 
@@ -60,7 +60,7 @@ class TTbar_SemiLep(Module):
         self.minJetPt = 200.
         self.maxJetEta = 2.5
 
-        self.minBDisc = 0.8484
+        #self.minBDisc = 0.8484
         ### Medium https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
 
         #>= 1 CSVmedium akt4 jet
@@ -74,80 +74,6 @@ class TTbar_SemiLep(Module):
         #dPhi (leading AK8 jet, leptonic W) >2
         #self.minDPhiWJet = 2.  
 
-        '''
-
-        self.addObject( ROOT.TH1D('h_lep0pt',          'h_lep0pt',        40, 0, 200 ) )
-        self.addObject( ROOT.TH1D('h_lep0eta',         'h_lep0eta',      48, -3, 3 ) )
-        self.addObject( ROOT.TH1D('h_lep0phi',         'h_lep0phi',      100, -5, 5 ) )
-
-        self.addObject( ROOT.TH1D('h_toppt',          'h_toppt',        100, 0, 500 ) )
-        self.addObject( ROOT.TH1D('h_topeta',         'h_topeta',      48, -3, 3 ) )
-        self.addObject( ROOT.TH1D('h_topphi',         'h_topphi',      100, -5, 5 ) )
-        self.addObject( ROOT.TH1D('h_topmass',        'h_topmass',      60, 140, 200 ) )
-
-        self.addObject( ROOT.TH1D('h_wpt',          'h_wpt',        100, 0, 500 ) )
-        self.addObject( ROOT.TH1D('h_weta',         'h_weta',      48, -3, 3 ) )
-        self.addObject( ROOT.TH1D('h_wphi',         'h_wphi',      100, -5, 5 ) )
-        self.addObject( ROOT.TH1D('h_wmass',        'h_wmass',      100, 50, 150 ) )
-
-        self.addObject( ROOT.TH1D('h_wpt_ptbin0',          'h_wpt_ptbin0',        100, 0, 500 ) )
-        self.addObject( ROOT.TH1D('h_weta_ptbin0',         'h_weta_ptbin0',      48, -3, 3 ) )
-        self.addObject( ROOT.TH1D('h_wphi_ptbin0',         'h_wphi_ptbin0',      100, -5, 5 ) )
-        self.addObject( ROOT.TH1D('h_wmass_ptbin0',        'h_wmass_ptbin0',      100, 50, 150 ) )
-
-        self.addObject( ROOT.TH1D('h_wpt_ptbin1',          'h_wpt_ptbin1',        100, 0, 500 ) )
-        self.addObject( ROOT.TH1D('h_weta_ptbin1',         'h_weta_ptbin1',      48, -3, 3 ) )
-        self.addObject( ROOT.TH1D('h_wphi_ptbin1',         'h_wphi_ptbin1',      100, -5, 5 ) )
-        self.addObject( ROOT.TH1D('h_wmass_ptbin1',        'h_wmass_ptbin1',      100, 50, 150 ) )
-
-        self.addObject( ROOT.TH1D('h_wpt_ptbin2',          'h_wpt_ptbin2',        100, 0, 500 ) )
-        self.addObject( ROOT.TH1D('h_weta_ptbin2',         'h_weta_ptbin2',      48, -3, 3 ) )
-        self.addObject( ROOT.TH1D('h_wphi_ptbin2',         'h_wphi_ptbin2',      100, -5, 5 ) )
-        self.addObject( ROOT.TH1D('h_wmass_ptbin2',        'h_wmass_ptbin2',      100, 50, 150 ) )
-
-        self.addObject( ROOT.TH1D('h_wpt_Tptbin0',          'h_wpt_Tptbin0',        100, 0, 500 ) )
-        self.addObject( ROOT.TH1D('h_weta_Tptbin0',         'h_weta_Tptbin0',      48, -3, 3 ) )
-        self.addObject( ROOT.TH1D('h_wphi_Tptbin0',         'h_wphi_Tptbin0',      100, -5, 5 ) )
-        self.addObject( ROOT.TH1D('h_wmass_Tptbin0',        'h_wmass_Tptbin0',      100, 50, 150 ) )
-
-        self.addObject( ROOT.TH1D('h_wpt_Tptbin1',          'h_wpt_Tptbin1',        100, 0, 500 ) )
-        self.addObject( ROOT.TH1D('h_weta_Tptbin1',         'h_weta_Tptbin1',      48, -3, 3 ) )
-        self.addObject( ROOT.TH1D('h_wphi_Tptbin1',         'h_wphi_Tptbin1',      100, -5, 5 ) )
-        self.addObject( ROOT.TH1D('h_wmass_Tptbin1',        'h_wmass_Tptbin1',      100, 50, 150 ) )
-
-        self.addObject( ROOT.TH1D('h_wpt_Tptbin2',          'h_wpt_Tptbin2',        100, 0, 500 ) )
-        self.addObject( ROOT.TH1D('h_weta_Tptbin2',         'h_weta_Tptbin2',      48, -3, 3 ) )
-        self.addObject( ROOT.TH1D('h_wphi_Tptbin2',         'h_wphi_Tptbin2',      100, -5, 5 ) )
-        self.addObject( ROOT.TH1D('h_wmass_Tptbin2',        'h_wmass_Tptbin2',      100, 50, 150 ) )
-
-        self.addObject( ROOT.TH1D('h_wleppt',          'h_wleppt',        100, 0, 500 ) )
-        self.addObject( ROOT.TH1D('h_wlepeta',         'h_wlepeta',      48, -3, 3 ) )
-        self.addObject( ROOT.TH1D('h_wlepphi',         'h_wlepphi',      100, -5, 5 ) )
-        self.addObject( ROOT.TH1D('h_wlepmass',        'h_wlepmass',      100, 50, 150 ) )
-
-
-        self.addObject( ROOT.TH1D('h_genjetpt',          'h_genjetpt',   100, 0, 500 ) )
-        self.addObject( ROOT.TH1D('h_genjeteta',         'h_genjeteta',      48, -3, 3 ) )
-        self.addObject( ROOT.TH1D('h_genjetphi',         'h_genjetphi',      100, -5, 5 ) )
-        self.addObject( ROOT.TH1D('h_genjetmass',        'h_genjetmass',      300, 0, 300 ) )
-
-        self.addObject( ROOT.TH1D('h_recoAK8jetpt',          'h_recoAK8jetpt',  100, 0, 500 ) )
-        self.addObject( ROOT.TH1D('h_recoAK8jeteta',         'h_recoAK8jeteta',      48, -3, 3 ) )
-        self.addObject( ROOT.TH1D('h_recoAK8jetphi',         'h_recoAK8jetphi',      100, -5, 5 ) )
-        self.addObject( ROOT.TH1D('h_recoAK8jetmass',        'h_recoAK8jetmass',      300, 0, 300 ) )
-
-        if self.isttbar :
-            self.addObject( ROOT.TH1D('h_matchedAK8jetpt',          'h_matchedAK8jetpt',      100, 0, 500 ) )
-            self.addObject( ROOT.TH1D('h_matchedAK8jeteta',         'h_matchedAK8jeteta',      48, -3, 3 ) )
-            self.addObject( ROOT.TH1D('h_matchedAK8jetphi',         'h_matchedAK8jetphi',      100, -5, 5 ) )
-            self.addObject( ROOT.TH1D('h_matchedAK8jetmass',        'h_matchedAK8jetmass',      300, 0, 300 ) )
-
-            self.addObject( ROOT.TH1D('h_unmatchedAK8jetpt',          'h_unmatchedAK8jetpt',      100, 0, 500 ) )
-            self.addObject( ROOT.TH1D('h_unmatchedAK8jeteta',         'h_unmatchedAK8jeteta',      48, -3, 3 ) )
-            self.addObject( ROOT.TH1D('h_unmatchedAK8jetphi',         'h_unmatchedAK8jetphi',      100, -5, 5 ) )
-            self.addObject( ROOT.TH1D('h_unmatchedAK8jetmass',        'h_unmatchedAK8jetmass',      300, 0, 300 ) )
-
-        '''
 
                   
     def endJob(self):
@@ -170,54 +96,19 @@ class TTbar_SemiLep(Module):
         #(AK8 Pt > 400 GeV): 
 
 
-
-
         # selection aligned with previous SF measurement standard selection
         # https://www.evernote.com/shard/s282/sh/7e5d6baa-d100-4025-8bf8-a61bf1adfbc1/f7e86fde2c2a165e
         
 
-        # 1 AK8 Pt > 200 GeV, |eta| < 2.5
+        # 1 AK8 Pt > 200 GeV, |eta| < 2.5 , dR(Ak8, lep) > 1.0
         # 1 AK4 Pt > 30 GeV, |eta| < 2.5
         # 1 lepton , mu pt > 53 GeV or el pt > 120 GeV
         # MET Pt > 40(mu) or 80(el) GeV
-        #Leptonic W - lepton + MET has Pt > 150 GeV 
+        #Leptonic W - lepton + MET has Pt > 150 GeV # did not apply this since we are missing MET eta
 
-        '''
-        self.out.branch("LeptonIsMu",  "F")
-        self.out.branch("Lepton_pt",  "F")
-        self.out.branch("Lepton_eta",  "F")
-        self.out.branch("Lepton_phi",  "F")               
-        self.out.branch("Lepton_mass",  "F")
-
-        self.out.branch("PuppiMET",  "F")
-
-        self.out.branch("genMET",  "F")
-
-        self.out.branch("AK4nearLep_pt",  "F")
-        self.out.branch("AK4nearLep_eta",  "F")
-        self.out.branch("AK4nearLep_phi",  "F")               
-        self.out.branch("AK4nearLep_mass",  "F")
-
-
-        self.out.branch("dr_LepJet",  "F")
-        self.out.branch("dphi_LepJet",  "F")
-        self.out.branch("dphi_MetJet",  "F")
-        self.out.branch("dphi_WJet"  ,  "F")
-        self.out.branch("FatJet_isW",  "F")
-        self.out.branch("FatJet_softDrop_mass",  "F")
-        self.out.branch("FatJet_tau21",  "F")
-        self.out.branch("FatJet_tau21_ddt",  "F")
-        self.out.branch("FatJet_tau21_ddt_retune",  "F")
-        self.out.branch("FatJet_tau32",  "F")
-        self.out.branch("FatJet_tau32_ddt",  "F")
-        self.out.branch("FatJet_tau32_ddt_retune",  "F")
-
-        self.out.branch("W_type",  "F")
-        self.out.branch("W_pt",  "F")
-        self.out.branch("MET",  "F")
-        '''
         self.out.branch("xsec",  "F")
         self.out.branch("genmatchedAK8Subjet",  "F")
+        self.out.branch("AK8Subjet0isMoreMassive",  "F")
         self.out.branch("genmatchedAK8",  "F")
 
         xsec = getXsec(inputFile.GetName())
@@ -348,13 +239,13 @@ class TTbar_SemiLep(Module):
 
 
             # we want the ak4 closest to the lepton
-            mindRObs = 5.0
-            genbHad = ROOT.TLorentzVector()
-            for ibcand, bcand in enumerate(genAK4jets) :
-                tempdR = bcand.p4().DeltaR(genleptons[0].p4())
-                if  tempdR < mindRObs :
-                    mindRObs = tempdR
-                    genbHad.SetPtEtaPhiM( bcand.p4().Perp(), bcand.p4().Eta() , bcand.p4().Phi() , bcand.p4().M()  )
+            #mindRObs = 5.0
+            #genbHad = ROOT.TLorentzVector()
+            #for ibcand, bcand in enumerate(genAK4jets) :
+            #    tempdR = bcand.p4().DeltaR(genleptons[0].p4())
+            #    if  tempdR < mindRObs :
+            #        mindRObs = tempdR
+            #        genbHad.SetPtEtaPhiM( bcand.p4().Perp(), bcand.p4().Eta() , bcand.p4().Phi() , bcand.p4().M()  )
 
             ''' If METgen_eta info is missing we cannot use gen MET for leptonic W selection
             
@@ -395,16 +286,15 @@ class TTbar_SemiLep(Module):
                 hasBtagSJ = None
                 gensubjetsMatched = self.getSubjets( p4=gen.p4(),subjets=gensubjets, dRmax=0.8)
                 for isub,sub in enumerate(gensubjetsMatched) : 
-                    if sub.btagCSVV2 > self.minBDisc :
-                        hasBtagSJ = True
-
-                    if sub.M() > maxSubjetMass and hasBtagSJ:  # btagCSVV2
+                    #if sub.btagCSVV2 > self.minBDisc :
+                    #    hasBtagSJ = True
+                    ### Note : will need to check for a b-tagged subjet in post selection
+                    if sub.M() > maxSubjetMass : # and hasBtagSJ :
                         maxSubjetMass = sub.M() 
                         WHad.SetPtEtaPhiM(sub.Perp(),sub.Eta(),sub.Phi(),sub.M())
                         
 
-        
-                genjetsGroomed[gen] = sum( gensubjetsMatched, ROOT.TLorentzVector() ) if (len(gensubjetsMatched) > 0 and sum( gensubjetsMatched, ROOT.TLorentzVector() ).Perp() > self.minJetPt *0.8 ) else None
+                genjetsGroomed[gen] = sum( gensubjetsMatched, ROOT.TLorentzVector() ) if len(gensubjetsMatched) > 0   else None
                 
             if self.verbose:
                 print '----'
@@ -415,7 +305,7 @@ class TTbar_SemiLep(Module):
             
 
             
-        ###### Get reco Top candidate #######
+        ###### Get reco Top/W candidate #######
         # List of reco muons
         allmuons = Collection(event, "Muon")
         allelectrons = Collection(event, "Electron")
@@ -475,11 +365,11 @@ class TTbar_SemiLep(Module):
 
 
 
-        Topcandreco =  WcandLep +  bHadreco
+        #Topcandreco =  WcandLep +  bHadreco
 
-        if self.verbose:
-            print '-----'
-            print ' reco Top Leptonic:', self.printP4( Topcandreco)
+        #if self.verbose:
+        #    print '-----'
+        #    print ' reco Top Leptonic:', self.printP4( Topcandreco)
         
         ###### Get list of reco jets #######
         # List of reco jets:
@@ -496,9 +386,10 @@ class TTbar_SemiLep(Module):
         jet_4v.SetPtEtaPhiM(recojets[0].pt,recojets[0].eta,recojets[0].phi,recojets[0].mass)
         dR_jetlep = jet_4v.DeltaR(lepton )
         
-        if dR_jetlep < self.mindRlepJet : return False
+        if dR_jetlep < self.mindRLepJet : return False
 
         self.isW = 0
+        self.SJ0isW = -1
         if isMC == False:
             genjets = [None] * len(recojets)
 
@@ -525,9 +416,11 @@ class TTbar_SemiLep(Module):
                 if recosubjets[reco.subJetIdx1].p4().M() > maxrecoSJmass and recosubjets[reco.subJetIdx1].p4().M() >  recosubjets[reco.subJetIdx2].p4().M() :
                     maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
                     WHadreco = recosubjets[reco.subJetIdx1].p4()
+                    self.SJ0isW = 1
                 if recosubjets[reco.subJetIdx2].p4().M() > maxrecoSJmass and recosubjets[reco.subJetIdx1].p4().M() < recosubjets[reco.subJetIdx2].p4().M() :
                     maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
                     WHadreco = recosubjets[reco.subJetIdx2].p4()
+                    self.SJ0isW = 0
 
                 for q in realqs:
                     gen_4v = ROOT.TLorentzVector()
@@ -587,6 +480,7 @@ class TTbar_SemiLep(Module):
 
         self.out.fillBranch("genmatchedAK8Subjet", self.matchedSJ)
         self.out.fillBranch("genmatchedAK8",  self.isW)
+        self.out.fillBranch("AK8Subjet0isMoreMassive", self.SJ0isW )
         
 
 
