@@ -12,6 +12,6 @@ process.source.fileNames = [
         'file:/uscms_data/d3/aparker/nanoAod/CMSSW_9_4_1/src/PhysicsTools/NanoAOD/test/DY1JetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8.root'
 ]
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
-process.output = cms.OutputModule("PoolOutputModule", fileName = cms.untracked.string('test_80XNanoAOD_V0.root'))
+process.output = cms.OutputModule("PoolOutputModule", fileName = cms.untracked.string('test_80XNanoAOD_V0-Skim.root'))
 process.out = cms.EndPath(process.output)
 
