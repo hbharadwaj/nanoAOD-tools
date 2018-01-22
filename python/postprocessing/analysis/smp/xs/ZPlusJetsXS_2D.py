@@ -26,8 +26,13 @@ class ZPlusJetsXS_2D(Module):
         self.nGenSD = 9
 
 
-        self.minMu0pt = 20.
-        self.minMu1pt = 20.
+        self.minMu0pt = 30.
+        self.minMu1pt = 30.
+
+        self.minEl0pt = 80.
+        self.minEl1pt = 80.
+
+
         self.minZpt = 100.
         self.minZmass = 60.
         self.maxZmass = 120.
@@ -153,13 +158,32 @@ class ZPlusJetsXS_2D(Module):
         if isMC:
             ###### Get gen Z candidate #######
             genleptons = Collection(event, "GenDressedLepton")
-
+            
+            #### 2 same flavor opposite charge leptons (muon or electron)
             if len(genleptons) < 2 :
                 return False
-            if abs(genleptons[0].pdgId) != 13 :
+            if abs(genleptons[0].pdgId) != 13 or abs(genleptons[0].pdgId) != 12 :
                 return False
-            if genleptons[0].p4().Perp() < self.minMu0pt * 0.9 or   genleptons[1].p4().Perp() < self.minMu1pt * 0.9 or abs(genleptons[1].p4().Eta()) > self.maxObjEta or  abs(genleptons[0].p4().Eta()) > self.maxObjEta:
+            if abs(genleptons[1].pdgId) != 13 or abs(genleptons[1].pdgId) != 12 :
                 return False                
+
+            if  abs(genleptons[0].pdgId) != abs(genleptons[1].pdgId) :
+                return False  
+            if  genleptons[0].charge * -1 != genleptons[1].charge :
+                return False   
+
+            if abs(genleptons[0].pdgId) == 12  :   
+                if genleptons[0].p4().Perp() < self.minEl0pt * 0.9 or   genleptons[1].p4().Perp() < self.minEl1pt * 0.9 :
+                    return False
+                if abs(genleptons[1].p4().Eta()) > self.maxObjEta or  abs(genleptons[0].p4().Eta()) > self.maxObjEta:
+                    return False  
+
+            if abs(genleptons[0].pdgId) == 13  :   
+                if genleptons[0].p4().Perp() < self.minMu0pt * 0.9 or   genleptons[1].p4().Perp() < self.minMu1pt * 0.9 :
+                    return False
+                if abs(genleptons[1].p4().Eta()) > self.maxObjEta or  abs(genleptons[0].p4().Eta()) > self.maxObjEta:
+                    return False     
+
             if self.verbose :
                 print '----'
                 print 'Gen leptons:'
@@ -204,25 +228,59 @@ class ZPlusJetsXS_2D(Module):
         # List of reco muons
         allmuons = Collection(event, "Muon")
         # Select reco muons:
-        muons = [ x for x in allmuons if (x.tightId and  x.p4().Perp() > self.minMu0pt and abs(x.p4().Eta()) < self.maxObjEta)]
-        if len(muons) < 2 :
+        muons = [ x for x in allmuons if (x.tightId and  x.p4().Perp() > self.minMu1pt and abs(x.p4().Eta()) < self.maxObjEta)]
+ 
+        # List of reco electrons
+        allelectrons = Collection(event, "Electron")
+        # Select reco muons:
+        electrons = [ x for x in allelectrons if ( x.tightId and x.p4().Perp() > self.minEl1pt and abs(x.p4().Eta()) < self.maxObjEta  )]
+
+
+        if len(muons) < 2 and len(electrons) < 2:
             return False
-        Zcand = muons[0].p4() + muons[1].p4()
+        lep0 = ROOT.TLorentzVector()
+        lep1 = ROOT.TLorentzVector() 
+        Zismu = -1   
+        if len(muons) >= 2 and len(electrons) < 2:           
+            Zcand = muons[0].p4() + muons[1].p4()
+            lep0 = muons[0].p4()
+            lep1 = muons[1].p4()
+            Zismu = 1
+
+        elif len(muons) < 2 and len(electrons) >= 2:           
+            Zcand = electrons[0].p4() + electrons[1].p4()
+            lep0 = electrons[0].p4()
+            lep1 = electrons[1].p4()
+            Zismu = 0
+        elif  len(muons) >= 2 and len(electrons) >= 2:
+            if  muons[0].p4().Perp() >  electrons[0].p4().Perp() :
+                Zcand = muons[0].p4() + muons[1].p4()
+                lep0 = muons[0].p4()
+                lep1 = muons[1].p4()
+                Zismu = 1
+            else :
+                Zcand = electrons[0].p4() + electrons[1].p4()
+                lep0 = electrons[0].p4()
+                lep1 = electrons[1].p4()
+                Zismu = 0                
+
         if Zcand.Perp() < self.minZpt or Zcand.M() < self.minZmass or Zcand.M() > self.maxZmass :
             return False
 
-        self.h_lep0pt.Fill(muons[0].p4().Perp())
-        self.h_lep0eta.Fill(muons[0].p4().Eta())
-        self.h_lep0phi.Fill(muons[0].p4().Phi())
+        self.h_lep0pt.Fill(lep0.Perp())
+        self.h_lep0eta.Fill(lep0.Eta())
+        self.h_lep0phi.Fill(lep0.Phi())
 
-        self.h_lep1pt.Fill(muons[1].p4().Perp())
-        self.h_lep1eta.Fill(muons[1].p4().Eta())
-        self.h_lep1phi.Fill(muons[1].p4().Phi())
+        self.h_lep1pt.Fill(lep0.Perp())
+        self.h_lep1eta.Fill(lep0.Eta())
+        self.h_lep1phi.Fill(lep0.Phi())
 
         self.h_zpt.Fill( Zcand.Perp() )
         self.h_zmass.Fill( Zcand.M() )
         self.h_zeta.Fill( Zcand.Eta() )
         self.h_zphi.Fill( Zcand.Phi() )
+        self.h_zismu.Fill( Zismu )        
+
         if self.verbose:
             print '-----'
             print ' recoZ:', self.printP4( Zcand )
