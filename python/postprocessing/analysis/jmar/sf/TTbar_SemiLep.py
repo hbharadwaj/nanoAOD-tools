@@ -60,7 +60,7 @@ class TTbar_SemiLep(Module):
         self.minJetPt = 200.
         self.maxJetEta = 2.5
 
-        #self.minBDisc = 0.8484
+        self.minBDisc = 0.8484
         ### Medium https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
 
         #>= 1 CSVmedium akt4 jet
@@ -345,12 +345,12 @@ class TTbar_SemiLep(Module):
 
 
         MET = ROOT.TLorentzVector()
-        ### Missing MET eta makes this not work
-        #MET.SetPtEtaPhiM(MET_pt, 0.0, event.PuppiMET_phi , event.PuppiMET_sumEt)
 
-        #WcandLep = lepton + MET
-        #if WcandLep.Perp() < self.minLepWPt :
-        #    return False
+        MET.SetPtEtaPhiM(MET_pt, 0.0, event.PuppiMET_phi , event.PuppiMET_sumEt)
+
+        WcandLep = lepton + MET
+        if WcandLep.Perp() < self.minLepWPt :
+            return False
 
         allrecoAK4jets = list(Collection(event, "Jet")) # are these AK4s ? 
         recojetsAK4 = [ x for x in allrecoAK4jets if x.p4().Perp() > self.minAK4Pt and abs(x.p4().Eta()) < self.maxJetEta]
@@ -416,11 +416,14 @@ class TTbar_SemiLep(Module):
                 if recosubjets[reco.subJetIdx1].p4().M() > maxrecoSJmass and recosubjets[reco.subJetIdx1].p4().M() >  recosubjets[reco.subJetIdx2].p4().M() :
                     maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
                     WHadreco = recosubjets[reco.subJetIdx1].p4()
-                    self.SJ0isW = 1
+                    if recosubjets[reco.subJetIdx1].btagCSVV2 >  self.minBDisc  or recosubjets[reco.subJetIdx2].btagCSVV2 >  self.minBDisc :
+
+                        self.SJ0isW = 1
                 if recosubjets[reco.subJetIdx2].p4().M() > maxrecoSJmass and recosubjets[reco.subJetIdx1].p4().M() < recosubjets[reco.subJetIdx2].p4().M() :
                     maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
                     WHadreco = recosubjets[reco.subJetIdx2].p4()
-                    self.SJ0isW = 0
+                    if recosubjets[reco.subJetIdx1].btagCSVV2 >  self.minBDisc  or recosubjets[reco.subJetIdx2].btagCSVV2 >  self.minBDisc :
+                        self.SJ0isW = 0
 
                 for q in realqs:
                     gen_4v = ROOT.TLorentzVector()
