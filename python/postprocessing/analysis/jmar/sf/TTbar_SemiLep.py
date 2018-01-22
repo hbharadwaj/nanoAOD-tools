@@ -39,8 +39,8 @@ class TTbar_SemiLep(Module):
         #is High Pt
 
 
-        #remove jet within 0.3
-        self.mindRLepJet = 0.3
+        #remove  AK8 jet within 1.0 of lepton
+        self.mindRLepJet = 1.0 
         #veto:
         # High pT muon ID
         #pT > 20 GeV, eta < 2.4??
@@ -59,8 +59,9 @@ class TTbar_SemiLep(Module):
 
         self.minJetPt = 200.
         self.maxJetEta = 2.5
-        self.minTopmass = 140.
-        self.maxTopmass = 200.
+
+        self.minBDisc = 0.8484
+        ### Medium https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
 
         #>= 1 CSVmedium akt4 jet
         self.minAK4Pt = 30.
@@ -72,6 +73,8 @@ class TTbar_SemiLep(Module):
         
         #dPhi (leading AK8 jet, leptonic W) >2
         #self.minDPhiWJet = 2.  
+
+        '''
 
         self.addObject( ROOT.TH1D('h_lep0pt',          'h_lep0pt',        40, 0, 200 ) )
         self.addObject( ROOT.TH1D('h_lep0eta',         'h_lep0eta',      48, -3, 3 ) )
@@ -144,11 +147,9 @@ class TTbar_SemiLep(Module):
             self.addObject( ROOT.TH1D('h_unmatchedAK8jetphi',         'h_unmatchedAK8jetphi',      100, -5, 5 ) )
             self.addObject( ROOT.TH1D('h_unmatchedAK8jetmass',        'h_unmatchedAK8jetmass',      300, 0, 300 ) )
 
+        '''
 
-
-        self.addObject( ROOT.TH1D('h_drGenReco',    'h_drGenReco',   40, 0, 0.8) )
-        self.addObject( ROOT.TH1D('h_drGenGroomed', 'h_drGenGroomed',40, 0, 0.8) )
-                            
+                  
     def endJob(self):
         Module.endJob(self)
         pass
@@ -181,20 +182,13 @@ class TTbar_SemiLep(Module):
         # MET Pt > 40(mu) or 80(el) GeV
         #Leptonic W - lepton + MET has Pt > 150 GeV 
 
-
+        '''
         self.out.branch("LeptonIsMu",  "F")
         self.out.branch("Lepton_pt",  "F")
         self.out.branch("Lepton_eta",  "F")
         self.out.branch("Lepton_phi",  "F")               
         self.out.branch("Lepton_mass",  "F")
 
-        '''
-        self.out.branch("genLeptonIsMu",  "F")
-        self.out.branch("genLepton_pt",  "F")
-        self.out.branch("genLepton_eta",  "F")
-        self.out.branch("genLepton_phi",  "F")               
-        self.out.branch("genLepton_mass",  "F")
-        '''
         self.out.branch("PuppiMET",  "F")
 
         self.out.branch("genMET",  "F")
@@ -221,7 +215,11 @@ class TTbar_SemiLep(Module):
         self.out.branch("W_type",  "F")
         self.out.branch("W_pt",  "F")
         self.out.branch("MET",  "F")
+        '''
         self.out.branch("xsec",  "F")
+        self.out.branch("genmatchedAK8Subjet",  "F")
+        self.out.branch("genmatchedAK8",  "F")
+
         xsec = getXsec(inputFile.GetName())
         print inputFile.GetName()
         print xsec
@@ -268,11 +266,18 @@ class TTbar_SemiLep(Module):
             Wdaus =  [x for x in gens if x.pt>1 and 0<abs(x.pdgId)<9]
             Wmoms =  [x for x in gens if x.pt>10 and abs(x.pdgId)==24]
 
+            TWdaus =  [x for x in gens if x.pt>1 and  0<abs(x.pdgId)<4]
             Tdaus =  [x for x in gens if x.pt>1 and (abs(x.pdgId)==5  or  abs(x.pdgId)==24 )]
             Tmoms =  [x for x in gens if x.pt>10 and abs(x.pdgId)==6]
                     
             realVs = []
+
             realTs = []
+            realWs = []
+            realqs = []
+            self.matchedJ = 0
+            self.matchedSJ = 0
+
             if len(Wmoms)>0 and len(Wdaus)>0:
                 for dau in Wdaus:
                     for mom in Wmoms:
@@ -282,12 +287,16 @@ class TTbar_SemiLep(Module):
                             continue    
 
             if len(Tmoms)>0 and len(Tdaus)>0:
-                for dau in Tdaus:
-                    for mom in Tmoms:
-                        try:
-                            if mom == Tmoms[dau.genPartIdxMother]: realTs.append(mom)    
-                        except:
-                            continue  
+                for gdau in TWdaus :
+                    for dau in Tdaus:
+                        for mom in Tmoms:
+                            try:
+                                if mom == Tmoms[dau.genPartIdxMother] and dau == Tdaus[gdau.genPartIdxMother]: 
+                                    realTs.append(mom)
+                                    realWs.append(dau)
+                                    realqs.append(gdau)    
+                            except:
+                                continue  
 
 
             ###### Get gen Top candidate #######
@@ -338,13 +347,12 @@ class TTbar_SemiLep(Module):
                 self.printCollection( genleptons )
 
 
-            # self.mindRLepJet is minimum seperation btw lep and ak4
-            # we want the ak4 with dR > self.mindRLepJet and dR < mindRObs
+            # we want the ak4 closest to the lepton
             mindRObs = 5.0
             genbHad = ROOT.TLorentzVector()
             for ibcand, bcand in enumerate(genAK4jets) :
                 tempdR = bcand.p4().DeltaR(genleptons[0].p4())
-                if tempdR > self.mindRLepJet and tempdR < mindRObs :
+                if  tempdR < mindRObs :
                     mindRObs = tempdR
                     genbHad.SetPtEtaPhiM( bcand.p4().Perp(), bcand.p4().Eta() , bcand.p4().Phi() , bcand.p4().M()  )
 
@@ -373,7 +381,7 @@ class TTbar_SemiLep(Module):
                 print '-----'
                 print 'all genjets:'
                 self.printCollection( allgenjets )
-            genjets = [ x for x in allgenjets if x.p4().Perp() > self.minJetPt * 0.8 and abs( x.p4().Eta()) < self.maxJetEta and genleptons[0].p4().DeltaR(x.p4()) > self.mindRLepJet ] #and x.p4().DeltaPhi( WbosonLep ) > self.minDPhiWJet     ]
+            genjets = [ x for x in allgenjets if x.p4().Perp() > self.minJetPt * 0.8 and abs( x.p4().Eta()) < self.maxJetEta ] #and x.p4().DeltaPhi( WbosonLep ) > self.minDPhiWJet     ]
             # List of gen subjets (no direct link from Genjet):
             gensubjets = list(Collection(event, "SubGenJetAK8"))
             # Dictionary to hold ungroomed-->groomed for gen
@@ -382,16 +390,21 @@ class TTbar_SemiLep(Module):
             maxSubjetMass = 1.
 
             WHad = ROOT.TLorentzVector()
+            
             for igen,gen in enumerate(genjets):
+                hasBtagSJ = None
                 gensubjetsMatched = self.getSubjets( p4=gen.p4(),subjets=gensubjets, dRmax=0.8)
                 for isub,sub in enumerate(gensubjetsMatched) : 
-                    if sub.M() > maxSubjetMass : 
+                    if sub.btagCSVV2 > self.minBDisc :
+                        hasBtagSJ = True
+
+                    if sub.M() > maxSubjetMass and hasBtagSJ:  # btagCSVV2
                         maxSubjetMass = sub.M() 
                         WHad.SetPtEtaPhiM(sub.Perp(),sub.Eta(),sub.Phi(),sub.M())
                         
 
-                    self.h_drGenGroomed.Fill( gen.p4().DeltaR( sub ) )
-                genjetsGroomed[gen] = sum( gensubjetsMatched, ROOT.TLorentzVector() ) if (len(gensubjetsMatched) > 0 and sum( gensubjetsMatched, ROOT.TLorentzVector() ).Perp() > self.minJetPt *0.8 and sum( gensubjetsMatched, ROOT.TLorentzVector() ).M() > self.minTopmass  *0.8 ) else None
+        
+                genjetsGroomed[gen] = sum( gensubjetsMatched, ROOT.TLorentzVector() ) if (len(gensubjetsMatched) > 0 and sum( gensubjetsMatched, ROOT.TLorentzVector() ).Perp() > self.minJetPt *0.8 ) else None
                 
             if self.verbose:
                 print '----'
@@ -418,27 +431,19 @@ class TTbar_SemiLep(Module):
         lepton = ROOT.TLorentzVector()
         isMu = None #False
 
-        if  ( len(muons) ) > 0 and  ( len(electrons) ) < 1  :
+        # Keep only events with exactly 1 lepton passing all above pt , eta and cut based ID cuts
+
+        if  ( len(muons) ) == 1 and  ( len(electrons) ) < 1  :
             lepton = muons[0].p4()
             isMu = True
 
-        if  ( len(muons) ) < 1 and  ( len(electrons) ) > 0  :
+        if  ( len(muons) ) < 1 and  ( len(electrons) ) == 1  :
             lepton = electrons[0].p4()
             isMu = False
       
         if  ( len(muons) ) > 0 and  ( len(electrons) ) > 0  :
+            # Ignore events with muons and electrons
             return False
-
-        triggerMu = Object(event, "HLT_Mu50")
-        triggerEl = Object(event, "HLT_Ele115_CaloIdVT_GsfTrkIdT")
-
-   
-
-
-
-
-        
-
 
 
         MET_pt = event.PuppiMET_pt     
@@ -448,13 +453,14 @@ class TTbar_SemiLep(Module):
         if not isMu and MET_pt < self.minElMETPt :
             return False
 
+
         MET = ROOT.TLorentzVector()
-        MET.SetPtEtaPhiM(MET_pt, 0.0, event.PuppiMET_phi , event.PuppiMET_sumEt)
+        ### Missing MET eta makes this not work
+        #MET.SetPtEtaPhiM(MET_pt, 0.0, event.PuppiMET_phi , event.PuppiMET_sumEt)
 
-
-        WcandLep = lepton + MET
-        if WcandLep.Perp() < self.minLepWPt :
-            return False
+        #WcandLep = lepton + MET
+        #if WcandLep.Perp() < self.minLepWPt :
+        #    return False
 
         allrecoAK4jets = list(Collection(event, "Jet")) # are these AK4s ? 
         recojetsAK4 = [ x for x in allrecoAK4jets if x.p4().Perp() > self.minAK4Pt and abs(x.p4().Eta()) < self.maxJetEta]
@@ -463,15 +469,14 @@ class TTbar_SemiLep(Module):
         bHadreco = ROOT.TLorentzVector()
         for ibcand, bcand in enumerate(recojetsAK4 ) :
             tempdR = bcand.p4().DeltaR(genleptons[0].p4())
-            if tempdR > self.mindRLepJet and tempdR < mindRObs :
+            if  tempdR < mindRObs :
                 mindRObs = tempdR
                 bHadreco.SetPtEtaPhiM( bcand.p4().Perp(), bcand.p4().Eta() , bcand.p4().Phi() , bcand.p4().M()  )
 
 
 
         Topcandreco =  WcandLep +  bHadreco
-        self.h_toppt.Fill( Topcandreco.Perp() )
-        self.h_topmass.Fill( Topcandreco.M() )
+
         if self.verbose:
             print '-----'
             print ' reco Top Leptonic:', self.printP4( Topcandreco)
@@ -483,12 +488,28 @@ class TTbar_SemiLep(Module):
             print '----'
             print 'all recojets:'
             self.printCollection( allrecojets )
-        recojets = [ x for x in allrecojets if x.p4().Perp() > self.minJetPt and  abs(x.p4().Eta()) < self.maxJetEta ] #and x.p4().DeltaPhi( minDPhiWJet ) > self.minDPhiWJet ]
+        recojets = [ x for x in allrecojets if x.p4().Perp() > self.minJetPt and  abs(x.p4().Eta()) < self.maxJetEta ]
         if len(recojets) < 1 : return False
         recojets.sort(key=lambda x:x.pt,reverse=True)
 
+        jet_4v = ROOT.TLorentzVector()
+        jet_4v.SetPtEtaPhiM(recojets[0].pt,recojets[0].eta,recojets[0].phi,recojets[0].mass)
+        dR_jetlep = jet_4v.DeltaR(lepton )
+        
+        if dR_jetlep < self.mindRlepJet : return False
+
+        self.isW = 0
         if isMC == False:
             genjets = [None] * len(recojets)
+
+        else :
+                
+            for V in realVs:
+                gen_4v = ROOT.TLorentzVector()
+                gen_4v.SetPtEtaPhiM(V.pt,V.eta,V.phi,80.)
+                dR = jet_4v.DeltaR(gen_4v)
+                if dR < 0.8: self.isW = 1
+    
         # List of reco subjets:
         recosubjets = list(Collection(event,"SubJet"))
         # Dictionary to hold reco--> gen matching
@@ -507,6 +528,12 @@ class TTbar_SemiLep(Module):
                 if recosubjets[reco.subJetIdx2].p4().M() > maxrecoSJmass and recosubjets[reco.subJetIdx1].p4().M() < recosubjets[reco.subJetIdx2].p4().M() :
                     maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
                     WHadreco = recosubjets[reco.subJetIdx2].p4()
+
+                for q in realqs:
+                    gen_4v = ROOT.TLorentzVector()
+                    gen_4v.SetPtEtaPhiM(q.pt,q.eta,q.phi,q.mass)
+                    dR = WHadreco.DeltaR(gen_4v)
+                    if dR < 0.6: self.matchedSJ = 1  
             elif reco.subJetIdx1 >= 0 :
                 recojetsGroomed[reco] = recosubjets[reco.subJetIdx1].p4()
                 maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
@@ -538,12 +565,7 @@ class TTbar_SemiLep(Module):
             genSDVal = None
             if gen != None:
                 if self.isttbar :
-                    self.h_matchedAK8jetpt.Fill(recoSD.Perp())
-                    self.h_matchedAK8jeteta.Fill(recoSD.Eta())
-                    self.h_matchedAK8jetphi.Fill(recoSD.Phi())
-                    self.h_matchedAK8jetmass.Fill(recoSD.M())
-                    
-                self.h_drGenReco.Fill( reco.p4().DeltaR(gen.p4()) )
+                    self.matchedSJ = 1
 
                 genSD = genjetsGroomed[gen]
                 if recoSD != None and genSD != None:
@@ -558,31 +580,15 @@ class TTbar_SemiLep(Module):
             elif  self.isttbar :
                 # Here we have a groomed det, but no groomed gen
                 if genSDVal == None and recoSD != None :
-                    self.h_unmatchedAK8jetpt.Fill(recoSD.Perp())
-                    self.h_unmatchedAK8jeteta.Fill(recoSD.Eta())
-                    self.h_unmatchedAK8jetphi.Fill(recoSD.Phi())
-                    self.h_unmatchedAK8jetmass.Fill(recoSD.M())
+
+                    self.matchedSJ = 0
 
 
-        #self.out.fillBranch("dr_LepJet"  ,dR_jetlep)
-        '''
-        self.out.fillBranch("dphi_LepJet",jet_4v.DeltaPhi(vLepton_4vec))
-        self.out.fillBranch("dphi_MetJet",jet_4v.DeltaPhi(met_4v))
-        self.out.fillBranch("dphi_WJet"  ,jet_4v.DeltaPhi(V))
-        self.out.fillBranch("W_type",Vtype)
-        self.out.fillBranch("W_pt", V.Perp()+met.sumEt )
-        self.out.fillBranch("MET", met.sumEt )
-        self.out.fillBranch("FatJet_isW", isW)
-        self.out.fillBranch("FatJet_softDrop_mass",  wFatJets[0].msoftdrop)
-        self.out.fillBranch("FatJet_tau21", wFatJets[0].tau2/wFatJets[0].tau1)
-        self.out.fillBranch("FatJet_tau21_ddt", wFatJets[0].tau2/wFatJets[0].tau1+0.063*ROOT.TMath.Log(wFatJets[0].msoftdrop**2/wFatJets[0].pt))
-        self.out.fillBranch("FatJet_tau21_ddt_retune", wFatJets[0].tau2/wFatJets[0].tau1+0.082*ROOT.TMath.Log(wFatJets[0].msoftdrop**2/wFatJets[0].pt))
+
+        self.out.fillBranch("genmatchedAK8Subjet", self.matchedSJ)
+        self.out.fillBranch("genmatchedAK8",  self.isW)
         
 
-        self.out.fillBranch("FatJet_tau32", wFatJets[0].tau3/wFatJets[0].tau2)
-        self.out.fillBranch("FatJet_tau32_ddt", wFatJets[0].tau3/wFatJets[0].tau2+0.063*ROOT.TMath.Log(wFatJets[0].msoftdrop**2/wFatJets[0].pt))
-        self.out.fillBranch("FatJet_tau32_ddt_retune", wFatJets[0].tau3/wFatJets[0].tau2+0.082*ROOT.TMath.Log(wFatJets[0].msoftdrop**2/wFatJets[0].pt))
-        '''
 
         return True
 # define modules using the syntax 'name = lambda : constructor' to avoid having them loaded when not needed
