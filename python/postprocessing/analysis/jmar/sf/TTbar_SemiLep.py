@@ -274,12 +274,12 @@ class TTbar_SemiLep(Module):
             genjets = [ x for x in allgenjets if x.p4().Perp() > self.minJetPt * 0.8 and abs( x.p4().Eta()) < self.maxJetEta]
 
             # List of gen subjets (no direct link from Genjet):
-            gensubjets = list(Collection(event, "SubGenJetAK8"))
+            #gensubjets = list(Collection(event, "SubGenJetAK8"))
             # Dictionary to hold ungroomed-->groomed for gen
-            genjetsGroomed = {}
+            #genjetsGroomed = {}
             # Get the groomed gen jets
-            maxSubjetMass = 1.
-
+            #maxSubjetMass = 1.
+            '''
             WHad = ROOT.TLorentzVector()
             
             for igen,gen in enumerate(genjets):
@@ -303,7 +303,7 @@ class TTbar_SemiLep(Module):
                     sdmassgen = genjetsGroomed[genjet].M() if genjet in genjetsGroomed else -1.0
                     print '         : %s %6.2f' % ( self.printP4(genjet), sdmassgen )            
             
-
+            ''' 
             
         ###### Get reco Top/W candidate #######
         # List of reco muons
@@ -412,12 +412,14 @@ class TTbar_SemiLep(Module):
         WHadreco = ROOT.TLorentzVector()
         for ireco,reco in enumerate(recojets):
             if reco.subJetIdx1 >= 0 and reco.subJetIdx2 >= 0 :
+                if reco.subJetIdx2 >= len(recosubjets): 
+                    if self.verbose: print "Reco subjet indices not in Subjet list, Skipping"    
+                    continue                
                 recojetsGroomed[reco] = recosubjets[reco.subJetIdx1].p4() + recosubjets[reco.subJetIdx2].p4()
                 if recosubjets[reco.subJetIdx1].p4().M() > maxrecoSJmass and recosubjets[reco.subJetIdx1].p4().M() >  recosubjets[reco.subJetIdx2].p4().M() :
                     maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
                     WHadreco = recosubjets[reco.subJetIdx1].p4()
                     if recosubjets[reco.subJetIdx1].btagCSVV2 >  self.minBDisc  or recosubjets[reco.subJetIdx2].btagCSVV2 >  self.minBDisc :
-
                         self.SJ0isW = 1
                 if recosubjets[reco.subJetIdx2].p4().M() > maxrecoSJmass and recosubjets[reco.subJetIdx1].p4().M() < recosubjets[reco.subJetIdx2].p4().M() :
                     maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
@@ -429,7 +431,7 @@ class TTbar_SemiLep(Module):
                     gen_4v = ROOT.TLorentzVector()
                     gen_4v.SetPtEtaPhiM(q.pt,q.eta,q.phi,q.mass)
                     dR = WHadreco.DeltaR(gen_4v)
-                    if dR < 0.6: self.matchedSJ = 1  
+                    if dR < 0.6 and self.isttbar : self.matchedSJ = 1  
             elif reco.subJetIdx1 >= 0 :
                 recojetsGroomed[reco] = recosubjets[reco.subJetIdx1].p4()
                 maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
@@ -445,41 +447,6 @@ class TTbar_SemiLep(Module):
             for recojet in recojets:
                 sdmassreco = recojetsGroomed[recojet].M() if recojet in recojetsGroomed and recojetsGroomed[recojet] != None else -1.0
                 print '         : %s %6.2f' % ( self.printP4( recojet),  sdmassreco )            
-
-                
-        # Loop over the reco,gen pairs.
-        # Check if there are reco and gen SD jets
-
-        for reco,gen in recoToGen.iteritems():
-            recoSD = recojetsGroomed[reco]
-            if reco == None :
-                continue
-            #if recoSD != None :
-            #    # Fill the groomed det if available
-
-            # Now check ungroomed gen
-            genSDVal = None
-            if gen != None:
-                if self.isttbar :
-                    self.matchedSJ = 1
-
-                genSD = genjetsGroomed[gen]
-                if recoSD != None and genSD != None:
-                    genSDVal = genSD.M()
-                                        
-                    if self.verbose : 
-                        print ' reco: %s %8.4f, gen : %s %8.4f ' % (
-                            self.printP4(reco), recoSD.M(), 
-                            self.printP4(gen), genSD.M()
-                            )
-
-            elif  self.isttbar :
-                # Here we have a groomed det, but no groomed gen
-                if genSDVal == None and recoSD != None :
-
-                    self.matchedSJ = 0
-
-
 
         self.out.fillBranch("genmatchedAK8Subjet", self.matchedSJ)
         self.out.fillBranch("genmatchedAK8",  self.isW)
