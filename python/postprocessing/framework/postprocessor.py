@@ -11,6 +11,7 @@ from PhysicsTools.NanoAODTools.postprocessing.framework.preskimming import preSk
 from PhysicsTools.NanoAODTools.postprocessing.framework.jobreport import JobReport
 
 class PostProcessor :
+
     def __init__(self,outputDir,inputFiles,cut=None,branchsel=None,modules=[],compression="LZMA:9",friend=False,postfix=None,
 		 jsonInput=None,noOut=False,justcount=False,provenance=False,haddFileName=None,fwkJobReport=False,histFileName=None,histDirName=None, outputbranchsel=None):
 	self.outputDir=outputDir
@@ -140,7 +141,7 @@ class PostProcessor :
 
 
 	if self.haddFileName :
-		os.system("./haddnano.py %s %s" %(self.haddFileName," ".join(outFileNames))) #FIXME: remove "./" once haddnano.py is distributed with cms releases
+		os.system("../../../scripts/haddnano.py %s %s" %(self.haddFileName," ".join(outFileNames))) #FIXME: remove "./" once haddnano.py is distributed with cms releases
 	if self.jobReport :
 		self.jobReport.addOutputFile(self.haddFileName)
 		self.jobReport.save()

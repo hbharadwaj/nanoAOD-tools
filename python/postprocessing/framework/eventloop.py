@@ -5,7 +5,7 @@ import ROOT
 
 class Module:
     def __init__(self):
-        self.writeHistFile=False
+        self.writeHistFile= False
     def beginJob(self,histFile=None,histDirName=None):
         if histFile != None and histDirName != None:
             self.writeHistFile=True

@@ -8,10 +8,10 @@ process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(),
 )
 process.source.fileNames = [
 	#'../../NanoAOD/test/lzma.root' ##you can change only this line
-        '/store/user/asparker/WJetsToLNu_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/WJetsTOlnuht-400To600TuneCUETP8M113TeV-madgraphMLM-pythia8RunIISummer16MiniAODv2-PUMoriond17/180115_042519/0000/test80X_NANO_12.root'
-
+        #'/store/user/arizzi/NanoCrabProdXmas/DY1JetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NanoCrabXmasRunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asym___heIV_v6-v1__32/171221_092730/0000/nano_100.root'
+        'file:/uscms_data/d3/aparker/nanoAod/CMSSW_9_4_1/src/PhysicsTools/NanoAOD/test/DY1JetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8.root'
 ]
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
-process.output = cms.OutputModule("PoolOutputModule", fileName = cms.untracked.string('test_80XNanoAOD_V0-Skim.root'))
+process.output = cms.OutputModule("PoolOutputModule", fileName = cms.untracked.string('test_80XNanoAOD_V0-skimmed.root'))
 process.out = cms.EndPath(process.output)
 
