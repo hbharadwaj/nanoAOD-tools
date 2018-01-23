@@ -247,13 +247,12 @@ class TTbar_SemiLep(Module):
             #        mindRObs = tempdR
             #        genbHad.SetPtEtaPhiM( bcand.p4().Perp(), bcand.p4().Eta() , bcand.p4().Phi() , bcand.p4().M()  )
 
-            ''' If METgen_eta info is missing we cannot use gen MET for leptonic W selection
             
             METgen_phi = event.GenMET_phi
-            METgen_eta = event.GenMET_eta 
+
             METgen = ROOT.TLorentzVector()
 
-            METgen.SetPtEtaPhiM(METgen_pt[0],METgen_eta[0],METgen_phi[0], 0.0  )
+            METgen.SetPtEtaPhiM(METgen_pt,0.0,METgen_phi, 0.0  )
             WLep = genleptons[0].p4() + METgen
             if WLep.Perp() < self.minLepWPt * 0.9 :
                 return False
@@ -263,7 +262,7 @@ class TTbar_SemiLep(Module):
                 print 'Gen W Leptonic:'
                 print self.printP4( WLep )
 
-            ''' 
+    
 
             ###### Get list of gen jets #######
             # List of gen jets:
@@ -272,7 +271,8 @@ class TTbar_SemiLep(Module):
                 print '-----'
                 print 'all genjets:'
                 self.printCollection( allgenjets )
-            genjets = [ x for x in allgenjets if x.p4().Perp() > self.minJetPt * 0.8 and abs( x.p4().Eta()) < self.maxJetEta ] #and x.p4().DeltaPhi( WbosonLep ) > self.minDPhiWJet     ]
+            genjets = [ x for x in allgenjets if x.p4().Perp() > self.minJetPt * 0.8 and abs( x.p4().Eta()) < self.maxJetEta]
+
             # List of gen subjets (no direct link from Genjet):
             gensubjets = list(Collection(event, "SubGenJetAK8"))
             # Dictionary to hold ungroomed-->groomed for gen
