@@ -55,7 +55,7 @@ class TTbar_SemiLep(Module):
         # HEEP + iso pt > 35 remove ecal crack region eta < 1.44, 1.56 < eta < 2.5
         #
 
-        self.minLepWPt = 200.
+        self.minLepWPt = 150.
 
         self.minJetPt = 200.
         self.maxJetEta = 2.5
@@ -354,7 +354,9 @@ class TTbar_SemiLep(Module):
 
         allrecoAK4jets = list(Collection(event, "Jet")) # are these AK4s ? 
         recojetsAK4 = [ x for x in allrecoAK4jets if x.p4().Perp() > self.minAK4Pt and abs(x.p4().Eta()) < self.maxJetEta]
-
+        if len(recojetsAK4) < 1:
+            return False
+        '''
         mindRObs = 5.0
         bHadreco = ROOT.TLorentzVector()
         for ibcand, bcand in enumerate(recojetsAK4 ) :
@@ -362,7 +364,7 @@ class TTbar_SemiLep(Module):
             if  tempdR < mindRObs :
                 mindRObs = tempdR
                 bHadreco.SetPtEtaPhiM( bcand.p4().Perp(), bcand.p4().Eta() , bcand.p4().Phi() , bcand.p4().M()  )
-
+        '''
 
 
         #Topcandreco =  WcandLep +  bHadreco
