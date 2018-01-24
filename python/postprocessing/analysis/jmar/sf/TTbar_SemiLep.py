@@ -405,8 +405,6 @@ class TTbar_SemiLep(Module):
     
         # List of reco subjets:
         recosubjets = list(Collection(event,"SubJet"))
-        # Dictionary to hold reco--> gen matching
-        recoToGen = matchObjectCollection( recojets, genjets, dRmax=0.05 )
         # Dictionary to hold ungroomed-->groomed for reco
         recojetsGroomed = {}        
         # Get the groomed reco jets
@@ -428,12 +426,12 @@ class TTbar_SemiLep(Module):
                     WHadreco = recosubjets[reco.subJetIdx2].p4()
                     if recosubjets[reco.subJetIdx1].btagCSVV2 >  self.minBDisc  or recosubjets[reco.subJetIdx2].btagCSVV2 >  self.minBDisc :
                         self.SJ0isW = 0
-
-                for q in realqs:
-                    gen_4v = ROOT.TLorentzVector()
-                    gen_4v.SetPtEtaPhiM(q.pt,q.eta,q.phi,q.mass)
-                    dR = WHadreco.DeltaR(gen_4v)
-                    if dR < 0.6 and self.isttbar : self.matchedSJ = 1  
+                if isMC :
+                    for q in realqs:
+                        gen_4v = ROOT.TLorentzVector()
+                        gen_4v.SetPtEtaPhiM(q.pt,q.eta,q.phi,q.mass)
+                        dR = WHadreco.DeltaR(gen_4v)
+                        if dR < 0.6 and self.isttbar : self.matchedSJ = 1  
             elif reco.subJetIdx1 >= 0 :
                 recojetsGroomed[reco] = recosubjets[reco.subJetIdx1].p4()
                 maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
@@ -445,13 +443,13 @@ class TTbar_SemiLep(Module):
 
         if self.verbose:
             print '----'
-            print 'opposite-Z recojets:'
+            print ' recojets opposite the lepton  (Top/W candidates) :'
             for recojet in recojets:
                 sdmassreco = recojetsGroomed[recojet].M() if recojet in recojetsGroomed and recojetsGroomed[recojet] != None else -1.0
                 print '         : %s %6.2f' % ( self.printP4( recojet),  sdmassreco )            
-
-        self.out.fillBranch("genmatchedAK8Subjet", self.matchedSJ)
-        self.out.fillBranch("genmatchedAK8",  self.isW)
+        if isMC :
+            self.out.fillBranch("genmatchedAK8Subjet", self.matchedSJ)
+            self.out.fillBranch("genmatchedAK8",  self.isW)
         self.out.fillBranch("AK8Subjet0isMoreMassive", self.SJ0isW )
         
 
