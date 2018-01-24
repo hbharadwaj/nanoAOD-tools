@@ -412,7 +412,7 @@ class TTbar_SemiLep(Module):
         WHadreco = ROOT.TLorentzVector()
         for ireco,reco in enumerate(recojets):
             if reco.subJetIdx1 >= 0 and reco.subJetIdx2 >= 0 :
-                if reco.subJetIdx2 >= len(recosubjets): 
+                if reco.subJetIdx2 >= len(recosubjets) or reco.subJetIdx1 >= len(recosubjets) : 
                     if self.verbose: print "Reco subjet indices not in Subjet list, Skipping"    
                     continue                
                 recojetsGroomed[reco] = recosubjets[reco.subJetIdx1].p4() + recosubjets[reco.subJetIdx2].p4()
