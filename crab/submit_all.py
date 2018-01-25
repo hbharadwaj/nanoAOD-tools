@@ -134,8 +134,12 @@ def main():
           #config.Data.userInputFiles = lfnList
           config.Data.inputDataset = job
           config.Data.inputDBS = 'phys03'
-          config.Data.splitting = 'FileBased'
-          config.Data.unitsPerJob = 1          
+          #config.Data.splitting = 'FileBased'
+          #config.Data.unitsPerJob = 1          
+          config.Data.splitting = 'EventAwareLumiBased'# 'FileBased'                                                                                                          
+          config.Data.unitsPerJob = 100 
+          config.Data.totalUnits = 2000
+         
           config.Data.publication =  True #False
           #config.Site.whitelist = [options.storageSite]          
         if 'MINIAOD' in datatier :

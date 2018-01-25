@@ -1,38 +1,33 @@
 from WMCore.Configuration import Configuration
 
-from CRABAPI.RawCommand import crabCommand 
-
 config = Configuration()
 
 config.section_("General")
-
+#config.General.requestName = 'SingleMuon_Run2016G-07Aug17_NanoAODV0-TTbarSemiLepSkim'
 config.General.transferLogs= True
 config.section_("JobType")
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = '/uscms/home/aparker/nobackup/nanoAod/myfork/CMSSW_9_4_1/src/PhysicsTools/NanoAODTools/crab/PSet.py'
-config.JobType.scriptExe = '/uscms/home/aparker/nobackup/nanoAod/myfork/CMSSW_9_4_1/src/PhysicsTools/NanoAODTools/crab/crab_script_SFs.sh'
-config.JobType.inputFiles = ['/uscms/home/aparker/nobackup/nanoAod/myfork/CMSSW_9_4_1/src/PhysicsTools/NanoAODTools/crab/crab_script_SFs.py','/uscms/home/aparker/nobackup/nanoAod/myfork/CMSSW_9_4_1/src/PhysicsTools/NanoAODTools/scripts/*'] #hadd nano will not be needed once nano tools are in cmssw
+config.JobType.psetName = 'PSet.py'
+config.JobType.scriptExe = 'crab_script_SFs.sh'
+config.JobType.inputFiles = ['crab_script_SFs.py','../scripts/haddnano.py','Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt'] #hadd nano will not be needed once nano tools are in cmssw
 config.JobType.sendPythonFolder	 = True
 config.section_("Data")
-# following 3 lines are the trick to skip DBS data lookup in CRAB Server
-#config.Data.userInputFiles = lfnList
-config.Data.splitting = 'FileBased'
-config.Data.unitsPerJob = 1
+#config.Data.inputDataset = '/SingleMuon/srappocc-SingleMuon_Run2016G-07Aug17-v1-b84139e74cafd5a0bfdaf4226ec7e7b4/USER'
+#'/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/srappocc-TTJetsTuneCUETP8M113TeV-madgraphMLM-pythia8RunIISummer16MiniAODv2-PUMoriond1780XmcRun2-4a4b356339e753e24c281c17941d0081/USER'
+#'/WJetsToLNu_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/asparker-WJetsToLNuHT-400To600TuneCUETP8M113TeV-madgraphMLM-pythia8RunIISummer16MiniAODv2-PUMoriond17-4a4b356339e753e24c281c17941d0081/USER'
+config.Data.inputDBS = 'phys03'
+
+
+config.Data.splitting = 'EventAwareLumiBased'# 'FileBased'
+config.Data.unitsPerJob = 100
+config.Data.totalUnits = 2000
+config.Data.outLFNDirBase = '/store/user/asparker/NanoAOD_V0-TTbarSkim/'
 
 config.Data.publication = True
 
+config.Data.outputDatasetTag = 'NanoAOD_V0-SkimTest'
 config.section_("Site")
+config.Site.storageSite = "T3_US_FNALLPC"
 
 
-# since there is no data discovery and no data location lookup in CRAB
-# you have to say where the input files are
-#config.Site.whitelist = ['T2_IT_Bari']
 
-
-#this fake PSET is needed for local test and for crab to figure the output filename                                                                                                                                                                           
-#you do not need to edit it unless you want to do a local test using a different input file than                                                                                                                                                              
-#the one marked below                                                                                                                                                                                                                                        
-
-#result = crabCommand('submit', config = config)
-
-#print (result)
