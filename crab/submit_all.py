@@ -58,7 +58,7 @@ def main():
 
     config.section_("JobType")
     config.JobType.pluginName = 'Analysis'
-    #config.JobType.psetName = options.cfg
+    config.JobType.psetName = options.cfg
     
     config.section_("Data")
     config.Data.inputDataset = None
@@ -86,17 +86,6 @@ def main():
     ## From now on that's what users should modify: this is the a-la-CRAB2 configuration part. ##
     #############################################################################################
 
-
-    #Taken from example here                                                       
-    #https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#crab_submit_fails_with_Block_con                                                                    
-
-    # this will use CRAB client API                                                
-    from CRABAPI.RawCommand import crabCommand
-
-    # talk to DBS to get list of files in this dataset                             
-    #from dbs.apis.dbsClient import DbsApi
-    #dbs = DbsApi('https://cmsweb.cern.ch/dbs/prod/phys03/DBSReader')
-
     datasetsFile = open( options.datasets )
     jobsLines = datasetsFile.readlines()
     jobs = []
@@ -121,27 +110,20 @@ def main():
       
         if datatier == 'USER':
 
-          config.JobType.psetName = 'PSet.py'
-          print options.cfg[0:-2]+'sh'
-          config.JobType.scriptExe = options.cfg[0:-2]+'sh'
-          config.JobType.inputFiles = [options.cfg ,'/uscms/home/aparker/nobackup/nanoAod/myfork/CMSSW_9_4_1/src/PhysicsTools/NanoAODTools/scripts/haddnano.py'] #hadd nano will not be needed once nano tools are in cmssw                                                                                                                    
+          config.JobType.scriptExe = 'crab_script_SFs.sh' 
+          config.JobType.inputFiles = [options.cfg ,'crab_script_SFs.sh', 'crab_script_SFs.py' ,'../scripts/haddnano.py', 'Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt'] #hadd nano will not be needed once nano tools are in cmssw                                                                                                                    
           config.JobType.sendPythonFolder  = True
-          #fileDictList = dbs.listFiles(dataset=job) 
-          #print ("dataset %s has %d files" % (job, len(fileDictList)))
-          # DBS client returns a list of dictionaries, but we want a list of Logical File Names                   
-          #lfnList = [ dic['logical_file_name'] for dic in fileDictList ]
-          # following 3 lines are the trick to skip DBS data lookup in CRAB Server                                               
-          #config.Data.userInputFiles = lfnList
+    
           config.Data.inputDataset = job
           config.Data.inputDBS = 'phys03'
-          #config.Data.splitting = 'FileBased'
-          #config.Data.unitsPerJob = 1          
-          config.Data.splitting = 'EventAwareLumiBased'# 'FileBased'                                                                                                          
-          config.Data.unitsPerJob = 100 
-          config.Data.totalUnits = 2000
+          config.Data.splitting = 'FileBased'
+          config.Data.unitsPerJob = 1          
+          #config.Data.splitting = 'EventAwareLumiBased'# 'FileBased'                                                                                                          
+          #config.Data.unitsPerJob = 100 
+          #config.Data.totalUnits = 2000
          
           config.Data.publication =  True #False
-          #config.Site.whitelist = [options.storageSite]          
+        
         if 'MINIAOD' in datatier :
           onfig.JobType.psetName = options.cfg
           config.Data.inputDataset = job
