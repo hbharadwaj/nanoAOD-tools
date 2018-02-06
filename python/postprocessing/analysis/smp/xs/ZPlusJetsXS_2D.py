@@ -25,10 +25,15 @@ class ZPlusJetsXS_2D(Module):
         self.nDetSD = 18
         self.nGenSD = 9
 
+        ### Kinematics Cuts ###
+        ### Considering either
+        ###Z - > mu+ mu-  + Jet
+
 
         self.minMu0pt = 30.
         self.minMu1pt = 30.
-
+        ### Or
+        ### Z - > e+ e-  + Jet
         self.minEl0pt = 80.
         self.minEl1pt = 80.
 
@@ -43,6 +48,28 @@ class ZPlusJetsXS_2D(Module):
 
         self.maxObjEta = 2.5
 
+        
+        ############################
+        
+        
+        #### 1D - Histograms using TH1Fs and TH2F for response ###
+        self.addObject( ROOT.TH2D('h_response',     'h_response',   self.nDetSD, self.binsDet, self.nGenSD, self.binsGen) )
+        self.addObject( ROOT.TH1D('h_reco',         'h_reco',       self.nDetSD, self.binsDet) )
+        self.addObject( ROOT.TH1D('h_gen',          'h_gen',        self.nGenSD, self.binsGen) )
+        self.addObject( ROOT.TH1D('h_fake',         'h_fake',       self.nDetSD, self.binsDet) )
+        self.addObject( ROOT.TH1D('h_miss',         'h_miss',       self.nGenSD, self.binsGen) )
+        
+        self.addObject( ROOT.TH2D('h_response_u',   'h_response_u', self.nDet, self.binsDet, self.nGen, self.binsGen) )
+        self.addObject( ROOT.TH1D('h_reco_u',       'h_reco_u',     self.nDet, self.binsDet) )
+        self.addObject( ROOT.TH1D('h_gen_u',        'h_gen_u',      self.nGen, self.binsGen) )
+        self.addObject( ROOT.TH1D('h_fake_u',       'h_fake_u',     self.nDet, self.binsDet) )
+        self.addObject( ROOT.TH1D('h_miss_u',       'h_miss_u',     self.nGen, self.binsGen) )
+
+        self.addObject( ROOT.TH1D('h_genjetpt',     'h_genjetpt',   100, 0, 500 ) )
+        self.addObject( ROOT.TH1D('h_recojetpt',    'h_recojetpt',  100, 0, 500 ) )
+  
+    
+        ##### 2D - Histograms using TUnfold objects ###
 
         self.addObject( ROOT.TUnfoldBinning("detectorBinning") )
         self.detectorDistribution=self.detectorBinning.AddBinning("detectorDistribution")
@@ -94,6 +121,9 @@ class ZPlusJetsXS_2D(Module):
         #self.addObject( self.signalBinning.CreateHistogram("h_sig") )
         #self.addObject( self.backgroundBinning.CreateHistogram("h_fake") )
         self.addObject( ROOT.TUnfoldBinning.CreateHistogramOfMigrations(self.generatorBinning,self.detectorBinning,"h_response") )
+        
+        
+        ### Control plots of observed particles ###
         
         self.addObject( ROOT.TH1D('h_lep0pt',          'h_lep0pt',        40, 0, 200 ) )
         self.addObject( ROOT.TH1D('h_lep0eta',         'h_lep0eta',      48, -3, 3 ) )
@@ -189,7 +219,7 @@ class ZPlusJetsXS_2D(Module):
                 print 'Gen leptons:'
                 self.printCollection( genleptons )
             Zboson = genleptons[0].p4() + genleptons[1].p4()
-            if Zboson.Perp() < self.minZpt * 0.9  or Zboson.M() < self.minZmass or Zboson.M() > self.maxZmass:
+            if Zboson.Perp() < self.minZpt * 0.9 :
                 return False
             if self.verbose:
                 print '-----'
@@ -203,7 +233,7 @@ class ZPlusJetsXS_2D(Module):
                 print '-----'
                 print 'all genjets:'
                 self.printCollection( allgenjets )
-            genjets = [ x for x in allgenjets if x.p4().Perp() > self.minJetPt * 0.8 and x.p4().DeltaPhi( Zboson ) > self.minDPhiZJet and abs(x.p4().Eta()) < self.maxObjEta  ]
+            genjets = [ x for x in allgenjets if x.p4().Perp() > self.minJetPt * 0.8 and x.p4().DeltaPhi( Zboson ) > self.minDPhiZJet ss .  ]
             # List of gen subjets (no direct link from Genjet):
             gensubjets = list(Collection(event, "SubGenJetAK8"))
             # Dictionary to hold ungroomed-->groomed for gen
@@ -327,15 +357,29 @@ class ZPlusJetsXS_2D(Module):
             recoSD = recojetsGroomed[reco]
             if reco == None :
                 continue
+            # Always fill the ungroomed det    
+            self.h_reco_u.Fill( reco.p4().M() )    
             if recoSD != None :
-                # Fill the groomed det if available
+                
+                # Fill the groomed det if available 
+                #1D
+                self.h_reco.Fill( recoSD.M() )
+                #2D
                 binNumberReco=self.detectorDistribution.GetGlobalBinNumber(reco.p4().Perp(), recoSD.M() )
                 self.h_reco.Fill( binNumberReco )
 
             # Now check ungroomed gen
             genSDVal = None
             if gen != None:
-                self.h_genjetpt.Fill( gen.p4().Perp() )
+                
+                
+                # Ungroomed gen OK, fill ungroomed response and truth
+                self.h_response_u.Fill( reco.p4().M(), gen.p4().M() )
+                self.h_gen_u.Fill( gen.p4().M() )
+                
+                self.h_drGenReco.Fill( reco.p4().DeltaR(gen.p4()) 
+                                      
+                self.h_genjetpt.Fill( gen.p4().Perp() )                      
                 self.h_genjeteta.Fill( gen.p4().Eta() )
                 self.h_genjetphi.Fill( gen.p4().Phi() )
                 self.h_genjetmass.Fill( gen.p4().M()  )
@@ -345,9 +389,6 @@ class ZPlusJetsXS_2D(Module):
                 self.h_recojeteta.Fill(  reco.p4().Eta()  )
                 self.h_recojetphi.Fill(  reco.p4().Phi()  )
                 self.h_recojetmass.Fill( reco.p4().M()    )
-
-
-                self.h_drGenReco.Fill( reco.p4().DeltaR(gen.p4()) )
 
                 genSD = genjetsGroomed[gen]
                 if recoSD != None and genSD != None:
@@ -362,10 +403,15 @@ class ZPlusJetsXS_2D(Module):
                             self.printP4(reco), recoSD.M(), 
                             self.printP4(gen), genSD.M()
                             )
-
+                     genSDVal = genSD.M()                 
+                     self.h_response.Fill( recoSD.M(), genSD.M() )
+                     self.h_gen.Fill( genSD.M() )
             else :
                 # Here we have a groomed det, but no groomed gen. Groomed fake. 
                 if genSDVal == None and recoSD != None :
+                    #1D                  
+                    self.h_fake.Fill( recoSD.M() )                   
+                    #2D                  
                     binNumberBkg=self.backgroundDistribution.GetGlobalBinNumber( reco.p4().Perp(), recoSD.M() )
                     self.h_gen.Fill( binNumberBkg )
         # Now loop over gen jets. If not in reco-->gen list,
@@ -377,10 +423,23 @@ class ZPlusJetsXS_2D(Module):
                 # If there isn't, it gets skipped. 
                 if genSD == None :
                     continue
+                # 1D 
+                #Ungroomed miss: 
+                self.h_response_u.Fill( -1.0, gen.p4().M() )
+                self.h_gen_u.Fill(gen.p4().M())
+                self.h_miss_u.Fill(gen.p4().M())
+                # groomed with Soft Drop miss :                      
+                self.h_response.Fill( -1.0, genSD.M() )
+                self.h_gen.Fill( genSD.M() )
+                self.h_miss.Fill( genSD.M() )                     
+                                      
+                                     
+                # 2D
                 binNumberGen=self.generatorDistribution.GetGlobalBinNumber(gen.p4().Perp(), genSD.M() )
                 self.h_response.Fill( 0, binNumberGen )
                 self.h_gen.Fill( binNumberGen )
-                
+               
+
 
         return True
 # define modules using the syntax 'name = lambda : constructor' to avoid having them loaded when not needed
