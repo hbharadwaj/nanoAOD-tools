@@ -1,4 +1,12 @@
 # nanoAOD-tools
+
+
+# LFV workflow test:
+
+ python scripts/nano_postproc_MyAnalysis.py outDir root://xrootd-cms.infn.it//store/user/piedavid/topNanoAOD/v6-1-1/2017/WZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/TopNanoAODv6-1-1_2017/200615_072720/0000/tree_23.root  -c "(Jet_pt>30 && abs(Jet_eta)<2.5  )&& (     (Electron_pt > 300. && nElectron >= 1  && abs(Electron_eta) < 2.5   )    ||   (Muon_pt > 300 && nMuon >= 1  &&  abs(Muon_eta) < .5  ) )"
+
+
+
 Tools for working with NanoAOD (requiring only python + root, not CMSSW)
 
 ## Checkout instructions: standalone
