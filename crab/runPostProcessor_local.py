@@ -26,7 +26,8 @@ era =  '2017'
 preselection = ''
 modulesToRun = []
 
-fileIn = ['root://cms-xrd-global.cern.ch//store/user/piedavid/topNanoAOD/v6-1-1/2017/DoubleEG/TopNanoAODv6-1-1_2017/200615_080330/0000/tree_51.root'  ]
+fileIn = ['root://cms-xrd-global.cern.ch//store/user/piedavid/topNanoAOD/v6-1-1/2017/WZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/TopNanoAODv6-1-1_2017/200615_072720/0000/tree_26.root']
+#['root://cms-xrd-global.cern.ch//store/user/piedavid/topNanoAOD/v6-1-1/2017/DoubleEG/TopNanoAODv6-1-1_2017/200615_080330/0000/tree_51.root'  ]
 
 
 #if '17MC' in era :

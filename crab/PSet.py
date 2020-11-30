@@ -9,9 +9,10 @@ process.source = cms.Source(
     # lumisToProcess=cms.untracked.VLuminosityBlockRange("254231:1-254231:24")
 )
 process.source.fileNames = [
-    '../../NanoAOD/test/lzma.root'  # you can change only this line
+#'root://cms-xrd-global.cern.ch//store/user/piedavid/topNanoAOD/v6-1-1/2017/WZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/TopNanoAODv6-1-1_2017/200615_072720/0000/tree_24.root'
+'tree_23TEST.root'
 ]
 process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(10))
 process.output = cms.OutputModule("PoolOutputModule",
-                                  fileName=cms.untracked.string('tree.root'))
+                                  fileName=cms.untracked.string('output_hists.root'), fakeNameForCrab =cms.untracked.bool(True))
 process.out = cms.EndPath(process.output)
