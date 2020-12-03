@@ -14,20 +14,27 @@ class MyAnalysisCC(Module ):
         self.ch = ROOT.TChain("Events")
         for line in self.afileList :
             self.ch.Add( line )
-
-        base = "$CMSSW_BASE/src/data"
-        
+        print "$CMSSW_BASE"
+        #print $CMSSW_BASE
+        os.system( "echo $CMSSW_BASE" )
+        base = os.environ['CMSSW_BASE'] + '/src/data'  #"$CMSSW_BASE/src/data"   #"../../../data"  #"$CMSSW_BASE/src/data"
+        print " os.environ['CMSSW_BASE'] + '/src/data'" 
+        print base
+        #print os.environ['CMSSW_BASE']        
         ROOT.gSystem.Load("libPhysicsToolsNanoAODTools.so")
         print "Load(BASE/TopLFV/lib/main.so"
         gSystem.Load("%s/TopLFV/lib/main.so"%(base) )
-        gInterpreter.ProcessLine('#include'+ '"%s/TopLFV/include/MyAnalysis.h"'%(base))
+        if isdata:
+            gInterpreter.ProcessLine('#include '+ '"%s/TopLFV/include/MyAnalysisData.h"'%(base))
+        else :
+            gInterpreter.ProcessLine('#include '+ '"%s/TopLFV/include/MyAnalysis.h"'%(base))
 
 
         print("Load C++ MyAnalysis worker module")
   
         print(" Importing MyAnalysis class...")
 
- 
+        print "Give input files to MyAnalysis class in TChain"
         print  self.ch 
         self.worker = MyAnalysis( self.ch )
         self.loopInfo = loopInfo
@@ -39,11 +46,13 @@ class MyAnalysisCC(Module ):
         Module.beginJob(self, histFile, histDirName)
         print "beginJob opened histfile"
        
-        self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
-        print " beginJob ran Loop function from MYANALYSIS"
+        #self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
+        #print " beginJob ran Loop function from MYANALYSIS"
         pass
 
     def endJob(self):
+        self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
+        print " endJob ran Loop function from MYANALYSIS"
         pass
 
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
@@ -51,6 +60,8 @@ class MyAnalysisCC(Module ):
         self.out = wrappedOutputTree
         #self.out.branch("MHTju_pt", "F")
         #self.out.branch("MHTju_phi", "F")
+        
+
 
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         pass
