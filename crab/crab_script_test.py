@@ -14,7 +14,6 @@ from PhysicsTools.NanoAODTools.postprocessing.modules.lfv.MyAnalysisCC import *
 #    inFiles = [line.rstrip() for line in f]
 #modulesList.append( MyAnalysisCC( False, inFiles , [ "output_hists.root",  "mc" , "" , "2017" , "" , 1 , 1 , 1   ] ))
 
- 'mc','','2017', '','87.31','41.53', '64310000' ]
 modulesList.append( MyAnalysisCC( False, inputFiles() , [ "output_hists.root",   'mc','','2017', '','87.31','41.53', '8926992' ]  ] ))
 
 p = PostProcessor(".",
