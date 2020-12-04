@@ -5,7 +5,7 @@ from CRABClient.UserUtilities import config
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'NanoPostprocessorLFVtest_Nov24_TTTo2L2Nu_3perjob_goodOutfileNames3'
+config.General.requestName = 'NanoPostprocessorLFVtest_TTTo2L2Nu_3perjob'
 config.General.transferLogs = True
 config.section_("JobType")
 config.JobType.pluginName = 'Analysis'
@@ -25,7 +25,7 @@ config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 3
 #config.Data.totalUnits = 10
 
-config.Data.outLFNDirBase = '/store/user/%s/NanoPosttest_TTTo2L2Nu_Nov24' % ( 'asparker' )
+config.Data.outLFNDirBase = '/store/user/%s/NanoPosttest_TTTo2L2Nu_Nov24' % ( 'jingyan' )
 # getUsernameFromSiteDB())
 config.Data.publication = False
 config.Data.outputDatasetTag = 'NanoTestPost_TT_3perjob_goodOutfiles3'
