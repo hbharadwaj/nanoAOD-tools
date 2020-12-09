@@ -37,6 +37,8 @@ class MyAnalysisCC(Module ):
         print "Give input files to MyAnalysis class in TChain"
         print  self.ch 
         self.worker = MyAnalysis( self.ch )
+        self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
+        print " _init_ ran Loop function from MYANALYSIS"
         self.loopInfo = loopInfo
   
         pass
@@ -51,8 +53,8 @@ class MyAnalysisCC(Module ):
         pass
 
     def endJob(self):
-        self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
-        print " endJob ran Loop function from MYANALYSIS"
+        #self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
+        #print " endJob ran Loop function from MYANALYSIS"
         pass
 
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
