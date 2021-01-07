@@ -37,6 +37,7 @@ class MyAnalysisCC(Module ):
         #print "Give input files to MyAnalysis class in TChain"
         #print  self.ch 
         #self.worker = MyAnalysis( self.ch )
+
         self.loopInfo = loopInfo
 
         # save the preselected trees into 1 big tree
@@ -57,6 +58,7 @@ class MyAnalysisCC(Module ):
         #print " beginJob ran Loop function from MYANALYSIS"
         pass
 
+
     def endJob(self, goodttreelist):
         self.goodttreelist = goodttreelist
         #print goodttreelist
@@ -69,6 +71,7 @@ class MyAnalysisCC(Module ):
         self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
         print " endJob ran Loop function from MYANALYSIS"
         #self.n +=1
+
         pass
 
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
