@@ -7,13 +7,13 @@ from ROOT import *
 import os,sys,inspect
 
 class MyAnalysisCC(Module ):
-    def __init__(self, isdata, afileList, loopInfo ):
+    def __init__(self, isdata, loopInfo ):
         self.writeHistFile = True
         self.isdata = isdata
-        self.afileList = afileList
-        self.ch = ROOT.TChain("Events")
-        for line in self.afileList :
-            self.ch.Add( line )
+        #self.afileList = afileList
+        #ROOT.TChain("Events")
+        #for line in self.afileList :
+        #    self.ch.Add( line )
         print "$CMSSW_BASE"
         #print $CMSSW_BASE
         os.system( "echo $CMSSW_BASE" )
@@ -34,10 +34,17 @@ class MyAnalysisCC(Module ):
   
         print(" Importing MyAnalysis class...")
 
-        print "Give input files to MyAnalysis class in TChain"
-        print  self.ch 
-        self.worker = MyAnalysis( self.ch )
+        #print "Give input files to MyAnalysis class in TChain"
+        #print  self.ch 
+        #self.worker = MyAnalysis( self.ch )
         self.loopInfo = loopInfo
+
+        # save the preselected trees into 1 big tree
+        self.goodttree = ROOT.TTree()
+ 
+        # save list of all you will add to make goodttree
+        #self.goodttreelist = ROOT.TList("atlist")
+        #  self.goodttreelist.Add(t1_isaTTree) 
   
         pass
         
@@ -50,9 +57,18 @@ class MyAnalysisCC(Module ):
         #print " beginJob ran Loop function from MYANALYSIS"
         pass
 
-    def endJob(self):
+    def endJob(self, goodttreelist):
+        self.goodttreelist = goodttreelist
+        #print goodttreelist
+        #self.goodttree = ROOT.TTree.MergeTrees(self.goodttreelist)
+        #self.goodttree.SetName("Events")
+        #self.goodttree.Write()
+        #self.tchainn = tchainn
+        print "feed mergedttree to MyAnalysis class"
+        self.worker = MyAnalysis( self.goodttreelist )
         self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
         print " endJob ran Loop function from MYANALYSIS"
+        #self.n +=1
         pass
 
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
@@ -66,6 +82,9 @@ class MyAnalysisCC(Module ):
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         pass
 
+
+
+    # pretty sure we dont need this
     # this function gets the pointers to Value and ArrayReaders and sets
     # them in the C++ worker class
     def initReaders(self, tree):
@@ -77,6 +96,10 @@ class MyAnalysisCC(Module ):
         # tree.valueReader or tree.arrayReader
         self._ttreereaderversion = tree._ttreereaderversion
 
+
+
+
+    # not currently using this, evnt loop is in the C++ code
     def analyze(self, event):
         """process event, return True (go to next module) or False (fail,
         go to next event)"""

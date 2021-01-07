@@ -59,6 +59,12 @@ class PostProcessor:
         # keep cached files across runs (it's then up to you to clean up the temp)
         self.longTermCache = longTermCache
 
+        # save tchain of all preselected events
+        self.goodtchain = None
+        self.goodttree = None
+        self.pyfilelist = []
+        self.pytreelist = []
+
     def prefetchFile(self, fname, verbose=True):
         tmpdir = os.environ['TMPDIR'] if 'TMPDIR' in os.environ else "/tmp"
         if not fname.startswith("root://"):
@@ -94,6 +100,25 @@ class PostProcessor:
                 except:
                     pass
             return fname, False
+
+
+    def getPreselectedEvents(self):
+
+        #self.pytreelist
+        #print self.pytreelist
+        #print "goodttreelist"
+        #print self.goodttreelist
+        #print "merge ttrees"
+
+        #self.goodttree = ROOT.TTree.MergeTrees(self.goodttreelist)
+        #self.goodttree.SetName("Events")
+        #self.goodttree.Write()
+        print self.goodttree
+
+        return self.goodttree#.Clone("newtchain")
+
+    #def runmodules(self):
+
 
     def run(self):
         outpostfix = self.postfix if self.postfix is not None else (
@@ -142,10 +167,31 @@ class PostProcessor:
             else:
                 m.beginJob()
 
-        fullClone = (len(self.modules) == 0)
+        fullClone = True #(len(self.modules) == 0)
         outFileNames = []
         t0 = time.time()
         totEntriesRead = 0
+        fnamnum = 0
+        self.goodtchain =  []
+
+        # save list of all you will add to make goodttree                                                                                                                        
+        #self.goodttreelist = ROOT.TList()
+
+        f0 = self.inputFiles[0]
+
+        print self.inputFiles
+ 
+        print "..............."
+
+        print self.inputFiles[0]
+        print "1"
+        f1 =  ROOT.TFile.Open( self.inputFiles[0].split(',')[0]  )
+        print "2"
+        t = f1.Get("Events")
+        t.SetBranchStatus('*',1)
+        print "3" 
+        self.goodttree = t
+        print "4"
         for fname in self.inputFiles:
             ffnames = []
             if "," in fname:
@@ -156,11 +202,18 @@ class PostProcessor:
             if self.prefetch:
                 ftoread, toBeDeleted = self.prefetchFile(fname)
                 inFile = ROOT.TFile.Open(ftoread)
+
             else:
                 inFile = ROOT.TFile.Open(fname)
-
+            self.pyfilelist.append(inFile)
+            print "5"
             # get input tree
             inTree = inFile.Get("Events")
+            print "5b"
+            #inTree.SetBranchStatus('*', 1)
+            print "6" 
+            #self.goodttree.CopyEntries(inTree)
+            print "7"
             if inTree is None:
                 inTree = inFile.Get("Friends")
             nEntries = min(inTree.GetEntries() -
@@ -169,6 +222,8 @@ class PostProcessor:
             # pre-skimming
             elist, jsonFilter = preSkim(
                 inTree, self.json, self.cut, maxEntries=self.maxEntries, firstEntry=self.firstEntry)
+
+        
             if self.justcount:
                 print('Would select %d / %d entries from %s (%.2f%%)' % (elist.GetN() if elist else nEntries, nEntries, fname, (elist.GetN() if elist else nEntries) / (0.01 * nEntries) if nEntries else 0))
                 if self.prefetch:
@@ -187,6 +242,12 @@ class PostProcessor:
                 inAddTrees.append(inAddTree)
                 inTree.AddFriend(inAddTree)
 
+            #if self.noOut :
+            #    if elist :
+            #        self.goodtchain.SetEntryList(elist)
+            #        #
+            #        print "applied preselection to tchain of all events"
+
             if fullClone:
                 # no need of a reader (no event loop), but set up the elist if available
                 if elist:
@@ -194,16 +255,25 @@ class PostProcessor:
             else:
                 # initialize reader
                 inTree = InputTree(inTree, elist)
+            print "add tree to goodtree list"
+            #t = inTree.CloneTree()
+            #print t
+            self.pytreelist.append(inTree) #.CloneTree())
 
+            #self.goodttreelist.Add(inTree)#.CloneTree())
+            '''  
+            #self.goodtchain.Add(inTree)
             # prepare output file
-            if not self.noOut:
-                outFileName = os.path.join(self.outputDir, os.path.basename(
+            outFileName = os.path.join(self.outputDir, os.path.basename(
                     fname).replace(".root", outpostfix + ".root"))
-                outFile = ROOT.TFile.Open(
-                    outFileName, "RECREATE", "", compressionLevel)
-                outFileNames.append(outFileName)
-                if compressionLevel:
-                    outFile.SetCompressionAlgorithm(compressionAlgo)
+            outFile = ROOT.TFile.Open(
+                outFileName, "RECREATE", "", compressionLevel)
+            outFileNames.append(outFileName)
+            if compressionLevel:
+                outFile.SetCompressionAlgorithm(compressionAlgo)
+
+            if not self.noOut:
+
                 # prepare output tree
                 if self.friend:
                     outTree = FriendOutput(inFile, inTree, outFile)
@@ -219,46 +289,84 @@ class PostProcessor:
                         firstEntry=self.firstEntry,
                         jsonFilter=jsonFilter,
                         provenance=self.provenance)
+                    #self.goodtchain.append(outTree.Clone())
+                    self.goodttreelist.Add(inTree.CloneTree()) 
             else:
-                outFile = None
-                outTree = None
+                
                 if self.branchsel:
                     self.branchsel.selectBranches(inTree)
+                #kkkkl if we want to add the outfile to the tchain, to apply the preselection
+                #outTree = FullOutput(
+                #        inFile,
+                #        inTree,
+                #        outFile,
+                #        branchSelection=self.branchsel,
+                #        outputbranchSelection=self.outputbranchsel,
+                #        fullClone=fullClone,
+                #        maxEntries=self.maxEntries,
+                #        firstEntry=self.firstEntry,
+                #        jsonFilter=jsonFilter,
+                #        provenance=self.provenance)
+                #self.goodtchain.Add(outFileName)
+                outFile = None
+                outTree = None
 
             # process events, if needed
-            if not fullClone:
-                eventRange = range(self.firstEntry, self.firstEntry +
-                                    nEntries) if nEntries > 0 and not elist else None
-                (nall, npass, timeLoop) = eventLoop(
-                    self.modules, inFile, outFile, inTree, outTree,
-                    eventRange=eventRange, maxEvents=self.maxEntries
-                )
-                print('Processed %d preselected entries from %s (%s entries). Finally selected %d entries' % (nall, fname, nEntries, npass))
-            else:
-                nall = nEntries
-                print('Selected %d / %d entries from %s (%.2f%%)' % (outTree.tree().GetEntries(), nall, fname, outTree.tree().GetEntries() / (0.01 * nall) if nall else 0))
+            #if not fullClone:
+            #    eventRange = range(self.firstEntry, self.firstEntry +
+            #                        nEntries) if nEntries > 0 and not elist else None
+            #    (nall, npass, timeLoop) = eventLoop(
+            #        self.modules, inFile, outFile, inTree, outTree,
+            #        eventRange=eventRange, maxEvents=self.maxEntries
+            #    )
+            #    print('Processed %d preselected entries from %s (%s entries). Finally selected %d entries' % (nall, fname, nEntries, npass))
+            #else:
+            nall = nEntries
+            print('Selected %d / %d entries from %s (%.2f%%)' % (outTree.tree().GetEntries(), nall, fname, outTree.tree().GetEntries() / (0.01 * nall) if nall else 0))
 
             # now write the output
             if not self.noOut:
                 outTree.write()
                 outFile.Close()
+                #self.goodtchain.Add(outFileName)
                 print("Done %s" % outFileName)
+            '''
+            nall = inTree.GetEntries()
             if self.jobReport:
                 self.jobReport.addInputFile(fname, nall)
-            if self.prefetch:
-                if toBeDeleted:
-                    os.unlink(ftoread)
+            #if self.prefetch:
+            #    if toBeDeleted:
+            #        os.unlink(ftoread)
 
+            #fnamenum +=1
+            
+
+        #print "try to merge ttrees"
+        #self.goodttree = ROOT.TTree.MergeTrees(self.goodttreelist)
+        #self.goodttree.SetName("Events")
+        #self.goodttree.Write()
+
+
+
+        mnum = 0
         for m in self.modules:
-            m.endJob()
+            if mnum == 0:
+                print 'self.getPreselectedEvents()'
+                print self.getPreselectedEvents()
+                print 'feeding preselected list, self.getPreselectedEvents() ,  to endjob, running MyAnalysisCC'
+                print self.getPreselectedEvents()
+                m.endJob( self.getPreselectedEvents() )
+            else:
+                m.endJob()
+            mnum +=1
 
         print("Total time %.1f sec. to process %i events. Rate = %.1f Hz." % ((time.time() - t0), totEntriesRead, totEntriesRead / (time.time() - t0)))
 
-        if self.haddFileName:
-            haddnano = "./haddnano.py" if os.path.isfile(
-                "./haddnano.py") else "haddnano.py"
-            os.system("%s %s %s" %
-                      (haddnano, self.haddFileName, " ".join(outFileNames)))
+        #if self.haddFileName:
+        #    haddnano = "./haddnano.py" if os.path.isfile(
+        #        "./haddnano.py") else "haddnano.py"
+        #    os.system("%s %s %s" %
+        #              (haddnano, self.haddFileName, " ".join(outFileNames)))
         if self.jobReport:
-            self.jobReport.addOutputFile(self.haddFileName)
+            #self.jobReport.addOutputFile(self.haddFileName)
             self.jobReport.save()

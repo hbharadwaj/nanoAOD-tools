@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 import os
 from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import *
@@ -15,15 +16,24 @@ from PhysicsTools.NanoAODTools.postprocessing.modules.lfv.MyAnalysisCC import *
 #modulesList.append( MyAnalysisCC( False, inFiles , [ "output_hists.root",  "mc" , "" , "2017" , "" , 1 , 1 , 1   ] ))
 
 
-modulesList.append( MyAnalysisCC( True, inputFiles() , [ "output_hists.root",  "DoubleMu" , "C" , "2017" , "" , 1 , 1 , 1   ] ))
+modulesList.append( MyAnalysisCC( True , [ "output_hists.root",  "DoubleEG" , "B" , "2017" , "" , 1 , 1 , 1   ] ))
 
 p = PostProcessor(".",
                   inputFiles(),
-                  "Jet_pt>25 &&  Jet_eta < 2.5",
+                  "Jet_pt>25 &&  Jet_eta < 2.5  && (nMuon + nElectron ) >=3  ",
                   modules=modulesList,
                   provenance=True,
                   fwkJobReport=True,
-                  jsonInput=runsAndLumis())
+                  jsonInput=runsAndLumis(),
+                  noOut=False)
+
+#listpre = p.getPreselectedEvents()
+
+
+#modulesList.append( MyAnalysisCC( True, listpre , [ "output_hists.root",  "DoubleMu" , "C" , "2017" , "" , 1 , 1 , 1   ] ))
+
+#p.addModules(modulesList)
+
 p.run()
 
 print("DONE")
