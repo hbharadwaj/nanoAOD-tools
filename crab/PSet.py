@@ -10,8 +10,8 @@ process.source = cms.Source(
 )
 process.source.fileNames = [
 #'root://cms-xrd-global.cern.ch//store/user/piedavid/topNanoAOD/v6-1-1/2017/WZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/TopNanoAODv6-1-1_2017/200615_072720/0000/tree_24.root'
-#'tree_9.root' # MC test file
-'tree_15.root'# data test file
+'tree_9.root' # MC test file
+#'tree_15.root'# data test file
 ]
 process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(10))
 process.output = cms.OutputModule("PoolOutputModule",
