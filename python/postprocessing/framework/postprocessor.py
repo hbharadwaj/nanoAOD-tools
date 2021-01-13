@@ -5,6 +5,8 @@ from PhysicsTools.NanoAODTools.postprocessing.framework.output import FriendOutp
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import eventLoop
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import InputTree
 from PhysicsTools.NanoAODTools.postprocessing.framework.branchselection import BranchSelection
+#from PhysicsTools.NanoAODTools.postprocessing.modules.lfv.MyAnalysisCC import *
+
 import os
 import time
 import hashlib
@@ -15,7 +17,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 class PostProcessor:
     def __init__(
-            self, outputDir, inputFiles, cut=None, branchsel=None, modules=[],
+            self, outputDir, inputFiles, cut=None,modules= [],  branchsel=None,
             compression="LZMA:9", friend=False, postfix=None, jsonInput=None,
             noOut=False, justcount=False, provenance=False, haddFileName=None,
             fwkJobReport=False, histFileName=None, histDirName=None,
@@ -25,7 +27,7 @@ class PostProcessor:
         self.outputDir = outputDir
         self.inputFiles = inputFiles
         self.cut = cut
-        self.modules = modules
+        
         self.compression = compression
         self.postfix = postfix
         self.json = jsonInput
@@ -37,10 +39,10 @@ class PostProcessor:
         self.haddFileName = haddFileName
         self.histFile = None
         self.histDirName = None
-        if self.jobReport and not self.haddFileName:
-            print("Because you requested a FJR we assume you want the final " \
-                "hadd. No name specified for the output file, will use tree.root")
-            self.haddFileName = "tree.root"
+        #if self.jobReport and not self.haddFileName:
+        #    print("Because you requested a FJR we assume you want the final " \
+        #        "hadd. No name specified for the output file, will use tree.root")
+        #    self.haddFileName = "tree.root"
         self.branchsel = BranchSelection(branchsel) if branchsel else None
         if outputbranchsel is not None:
             self.outputbranchsel = BranchSelection(outputbranchsel)
@@ -58,6 +60,13 @@ class PostProcessor:
         self.prefetch = prefetch  # prefetch files to TMPDIR using xrdcp
         # keep cached files across runs (it's then up to you to clean up the temp)
         self.longTermCache = longTermCache
+
+        self.modules = modules
+
+
+
+
+
 
     def prefetchFile(self, fname, verbose=True):
         tmpdir = os.environ['TMPDIR'] if 'TMPDIR' in os.environ else "/tmp"
@@ -95,7 +104,11 @@ class PostProcessor:
                     pass
             return fname, False
 
+
+
+
     def run(self):
+
         outpostfix = self.postfix if self.postfix is not None else (
             "_Friend" if self.friend else "_Skim")
         if not self.noOut:
@@ -134,6 +147,10 @@ class PostProcessor:
             self.histFile = ROOT.TFile.Open(self.histFileName, "RECREATE")
         else:
             self.histFile = None
+            
+        #self.modules.append( MyAnalysisCC( False , [None, None ],  [ "output_hists.root",  "mc" , "" , "2017" , "" , 0.0512, 41.53, 500000   ] ))
+        #self.modules.append( MyAnalysisCC( True , [ None, None ] , [ "output_hists.root",  "data" , "DoubleMu" , "2017" , "B" , 1,1,1  ] ))
+
 
         for m in self.modules:
             if hasattr(m, 'writeHistFile') and m.writeHistFile:
@@ -142,7 +159,7 @@ class PostProcessor:
             else:
                 m.beginJob()
 
-        fullClone = (len(self.modules) == 0)
+        fullClone =  0 #(len(self.modules) == 0)
         outFileNames = []
         t0 = time.time()
         totEntriesRead = 0
@@ -160,15 +177,15 @@ class PostProcessor:
                 inFile = ROOT.TFile.Open(fname)
 
             # get input tree
-            inTree = inFile.Get("Events")
-            if inTree is None:
-                inTree = inFile.Get("Friends")
-            nEntries = min(inTree.GetEntries() -
+            self.inTree = inFile.Get("Events")
+            if self.inTree is None:
+                self.inTree = inFile.Get("Friends")
+            nEntries = min(self.inTree.GetEntries() -
                            self.firstEntry, self.maxEntries)
             totEntriesRead += nEntries
             # pre-skimming
             elist, jsonFilter = preSkim(
-                inTree, self.json, self.cut, maxEntries=self.maxEntries, firstEntry=self.firstEntry)
+                self.inTree, self.json, self.cut, maxEntries=self.maxEntries, firstEntry=self.firstEntry)
             if self.justcount:
                 print('Would select %d / %d entries from %s (%.2f%%)' % (elist.GetN() if elist else nEntries, nEntries, fname, (elist.GetN() if elist else nEntries) / (0.01 * nEntries) if nEntries else 0))
                 if self.prefetch:
@@ -179,22 +196,25 @@ class PostProcessor:
                 print('Pre-select %d entries out of %s (%.2f%%)' % (elist.GetN() if elist else nEntries, nEntries, (elist.GetN() if elist else nEntries) / (0.01 * nEntries) if nEntries else 0))
                 inAddFiles = []
                 inAddTrees = []
+            inAddFiles.append(ROOT.TFile.Open(fname))
             for ffname in ffnames:
                 inAddFiles.append(ROOT.TFile.Open(ffname))
                 inAddTree = inAddFiles[-1].Get("Events")
                 if inAddTree is None:
                     inAddTree = inAddFiles[-1].Get("Friends")
                 inAddTrees.append(inAddTree)
-                inTree.AddFriend(inAddTree)
+                self.inTree.AddFriend(inAddTree)
 
-            if fullClone:
-                # no need of a reader (no event loop), but set up the elist if available
-                if elist:
-                    inTree.SetEntryList(elist)
-            else:
-                # initialize reader
-                inTree = InputTree(inTree, elist)
+            if elist:
+                    self.inTree.SetEntryList(elist)
 
+            print elist.GetN()
+            #self.modules.append( MyAnalysisCC( False , [self.inTree, elist ],  [ "output_hists.root",  "mc" , "" , "2017" , "" , 0.0512, 41.53, 500000   ] ))
+            #self.modules.append( MyAnalysisCC( True , [self.inTree, elist ] , [ "output_hists.root",  "data" , "DoubleMu" , "2017" , "B" , 1,1,1  ] ))
+
+
+            #return ( inAddFiles , self.inTree) #.CloneTree(-1)
+            ''' 
             # prepare output file
             if not self.noOut:
                 outFileName = os.path.join(self.outputDir, os.path.basename(
@@ -243,14 +263,24 @@ class PostProcessor:
                 outTree.write()
                 outFile.Close()
                 print("Done %s" % outFileName)
+            
             if self.jobReport:
                 self.jobReport.addInputFile(fname, nall)
             if self.prefetch:
                 if toBeDeleted:
                     os.unlink(ftoread)
+            '''
 
+
+
+
+        nNum = 0
         for m in self.modules:
-            m.endJob()
+            if nNum == 0 :
+                m.endJob(self.inTree) 
+            else:
+                m.endJob()
+            nNum +=1
 
         print("Total time %.1f sec. to process %i events. Rate = %.1f Hz." % ((time.time() - t0), totEntriesRead, totEntriesRead / (time.time() - t0)))
 
@@ -260,5 +290,6 @@ class PostProcessor:
             os.system("%s %s %s" %
                       (haddnano, self.haddFileName, " ".join(outFileNames)))
         if self.jobReport:
-            self.jobReport.addOutputFile(self.haddFileName)
+            self.jobReport.addOutputFile(self.histFileName )
             self.jobReport.save()
+        print "Done running modules"

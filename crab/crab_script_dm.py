@@ -15,7 +15,7 @@ from PhysicsTools.NanoAODTools.postprocessing.modules.lfv.MyAnalysisCC import *
 #modulesList.append( MyAnalysisCC( False, inFiles , [ "output_hists.root",  "mc" , "" , "2017" , "" , 1 , 1 , 1   ] ))
 
 
-modulesList.append( MyAnalysisCC( True, inputFiles() , [ "output_hists.root",  "DoubleMu" , "C" , "2017" , "" , 1 , 1 , 1   ] ))
+modulesList.append( MyAnalysisCC( True, inputFiles() , [ "output_hists.root",   "data" , "DoubleMu" , "2017" , "C" , 1,1,1  ] ))
 
 p = PostProcessor(".",
                   inputFiles(),

@@ -7,13 +7,23 @@ from ROOT import *
 import os,sys,inspect
 
 class MyAnalysisCC(Module ):
-    def __init__(self, isdata, afileList, loopInfo ):
+    def __init__(self , isdata, afileList, loopInfo ):
         self.writeHistFile = True
         self.isdata = isdata
-        self.afileList = afileList
-        self.ch = ROOT.TChain("Events")
-        for line in self.afileList :
-            self.ch.Add( line )
+        self.afileList = afileList#[#0]
+        self.elist  = None #afileList[1]
+
+   
+        if self.elist != None :
+            print "GetEntries for Events tree"
+            print self.afileList.GetEntries()
+            print "Get number of entries passing preselection"  
+            print self.elist.GetN()
+            self.afileList.SetEntryList(self.elist)
+
+        #self.ch = ROOT.TChain("Events")
+        #for line in self.afileList :
+        #    self.ch.Add( line )
         print "$CMSSW_BASE"
         #print $CMSSW_BASE
         os.system( "echo $CMSSW_BASE" )
@@ -32,19 +42,24 @@ class MyAnalysisCC(Module ):
 
         print("Load C++ MyAnalysis worker module")
   
-        print(" Importing MyAnalysis class...")
+        #print(" Importing MyAnalysis class...")
 
-        print "Give input files to MyAnalysis class in TChain"
-        print  self.ch 
-        self.worker = MyAnalysis( self.ch )
-        self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
-        print " _init_ ran Loop function from MYANALYSIS"
+        #print "Give input files to MyAnalysis class in TChain"
+        #print  self.ch 
         self.loopInfo = loopInfo
+        #if self.dontRun :
+        #    print "not looping"
+        #else :    
+        #    self.worker = MyAnalysis( self.afileList) #self.ch)
+        #    self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
+        #    print " _init_ ran Loop function from MYANALYSIS"
+        
   
         pass
         
 
     def beginJob(self, histFile, histDirName):
+
         Module.beginJob(self, histFile, histDirName)
         print "beginJob opened histfile"
        
@@ -52,7 +67,12 @@ class MyAnalysisCC(Module ):
         #print " beginJob ran Loop function from MYANALYSIS"
         pass
 
-    def endJob(self):
+    def endJob(self, atree ):
+        print atree
+        self.atree = atree
+        self.worker = MyAnalysis( self.atree ) #self.ch)
+        self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
+        print " endJob ran Loop function from MYANALYSIS"
         #self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
         #print " endJob ran Loop function from MYANALYSIS"
         pass
