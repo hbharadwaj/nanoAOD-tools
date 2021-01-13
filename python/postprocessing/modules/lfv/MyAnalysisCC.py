@@ -21,9 +21,9 @@ class MyAnalysisCC(Module ):
             print self.elist.GetN()
             self.afileList.SetEntryList(self.elist)
 
-        #self.ch = ROOT.TChain("Events")
-        #for line in self.afileList :
-        #    self.ch.Add( line )
+        self.ch = ROOT.TChain("Events")
+        for line in self.afileList :
+            self.ch.Add( line )
         print "$CMSSW_BASE"
         #print $CMSSW_BASE
         os.system( "echo $CMSSW_BASE" )
@@ -49,10 +49,17 @@ class MyAnalysisCC(Module ):
         self.loopInfo = loopInfo
         #if self.dontRun :
         #    print "not looping"
-        #else :    
-        #    self.worker = MyAnalysis( self.afileList) #self.ch)
-        #    self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
-        #    print " _init_ ran Loop function from MYANALYSIS"
+        #else :
+        #elif self.histFileName is not None and self.histDirName is not None:
+        #self.histFileName = "output_hists.root"
+        #self.histFile = ROOT.TFile.Open(self.histFileName, "RECREATE")
+        #print "beginjob"
+        #Module.beginJob(self, self.histFile , "lfv")    
+        #self.worker = MyAnalysis( self.ch)
+        print "loop"
+        print self.loopInfo
+        #self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
+        #print " _init_ ran Loop function from MYANALYSIS"
         
   
         pass
@@ -62,19 +69,28 @@ class MyAnalysisCC(Module ):
 
         Module.beginJob(self, histFile, histDirName)
         print "beginJob opened histfile"
-       
+        print self.afileList 
+        self.worker = MyAnalysis( self.afileList)#ch)
+        self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
+        #print " beginJob ran Loop function from MYANALYSIS"
         #self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
         #print " beginJob ran Loop function from MYANALYSIS"
         pass
 
-    def endJob(self, atree ):
-        print atree
-        self.atree = atree
-        self.worker = MyAnalysis( self.atree ) #self.ch)
-        self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
-        print " endJob ran Loop function from MYANALYSIS"
+    def endJob(self):#, atree ):
+        #print "endJob"
+        #print self.ch
+        #self.worker = MyAnalysis( self.ch)
         #self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
         #print " endJob ran Loop function from MYANALYSIS"
+        #print atree
+        #self.atree = atree
+        #self.worker = MyAnalysis( self.atree ) #self.ch)
+        #self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
+        #print " endJob ran Loop function from MYANALYSIS"
+        
+
+
         pass
 
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):

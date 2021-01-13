@@ -5,7 +5,7 @@ from CRABClient.UserUtilities import config
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'NanoPostprocessorLFVtest_Jan12_LFVStVecC_1FilePerJob_FulldatasetTest_noPre'
+config.General.requestName = 'NanoPostprocessorLFVtest_Jan13_LFVStVecC_1FilePerJob_FulldatasetTest_noPre'
 config.General.transferLogs = True
 config.section_("JobType")
 config.JobType.pluginName = 'Analysis'
