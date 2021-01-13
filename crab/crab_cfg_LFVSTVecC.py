@@ -5,7 +5,7 @@ from CRABClient.UserUtilities import config
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'NanoPostprocessorLFVtest_Jan12_LFVStVecC_2FilesPerJob_FulldatasetTest'
+config.General.requestName = 'NanoPostprocessorLFVtest_Jan12_LFVStVecC_1FilePerJob_FulldatasetTest_noPre'
 config.General.transferLogs = True
 config.section_("JobType")
 config.JobType.pluginName = 'Analysis'
@@ -32,7 +32,7 @@ config.Data.inputDBS = 'phys03'
 #config.Data.inputDBS = 'global'
 config.Data.splitting = 'FileBased'
 #config.Data.splitting = 'EventAwareLumiBased'
-config.Data.unitsPerJob = 2
+config.Data.unitsPerJob = 1
 #config.Data.totalUnits = 10
 
 config.Data.outLFNDirBase = '/store/user/%s/NanoPosttest_LFVStVecC_Jan12' % ( 'asparker' )
