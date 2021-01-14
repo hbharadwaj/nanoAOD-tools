@@ -123,12 +123,12 @@ print chain
 
 #gSystem.Load("../../src/RoccoR.o")
 
-gInterpreter.ProcessLine('#include "../../include/MyAnalysis.h"') 
-gSystem.Load("../../lib/main.so")
+gInterpreter.ProcessLine('#include "../../../data/TopLFV/include/MyAnalysis.h"') 
+gSystem.Load("../../../data/TopLFV/lib/main.so")
 #gInterpreter.ProcessLine('#include "../../include/MyAnalysis.h"')
 #gInterpreter.ProcessLine('#include "../../src/MyNanoAnalysis.cc"')
 
-instance = MyNanoAnalysis(chain)
+instance = MyAnalysis(chain)
 
 
 ### HATS comment:

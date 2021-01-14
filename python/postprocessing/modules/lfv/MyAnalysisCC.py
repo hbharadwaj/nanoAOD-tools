@@ -56,7 +56,7 @@ class MyAnalysisCC(Module ):
         #print "beginjob"
         #Module.beginJob(self, self.histFile , "lfv")    
         #self.worker = MyAnalysis( self.ch)
-        print "loop"
+        #print "loop"
         print self.loopInfo
         #self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
         #print " _init_ ran Loop function from MYANALYSIS"
@@ -65,13 +65,18 @@ class MyAnalysisCC(Module ):
         pass
         
 
+
+    def addTree(self, atree ):
+        self.afileList = atree
+        pass
+
     def beginJob(self, histFile, histDirName):
 
         Module.beginJob(self, histFile, histDirName)
-        print "beginJob opened histfile"
-        print self.afileList 
-        self.worker = MyAnalysis( self.afileList)#ch)
-        self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
+        #print "beginJob opened histfile"
+        #print self.afileList 
+        #self.worker = MyAnalysis( self.afileList)#ch)
+        #self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
         #print " beginJob ran Loop function from MYANALYSIS"
         #self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
         #print " beginJob ran Loop function from MYANALYSIS"
@@ -80,9 +85,9 @@ class MyAnalysisCC(Module ):
     def endJob(self):#, atree ):
         #print "endJob"
         #print self.ch
-        #self.worker = MyAnalysis( self.ch)
-        #self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
-        #print " endJob ran Loop function from MYANALYSIS"
+        self.worker = MyAnalysis( self.afileList )
+        self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
+        print " endJob ran Loop function from MYANALYSIS"
         #print atree
         #self.atree = atree
         #self.worker = MyAnalysis( self.atree ) #self.ch)

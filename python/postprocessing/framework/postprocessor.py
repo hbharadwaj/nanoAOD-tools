@@ -9,7 +9,7 @@ from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import eventLo
 from PhysicsTools.NanoAODTools.postprocessing.framework.output import FriendOutput, FullOutput
 from PhysicsTools.NanoAODTools.postprocessing.framework.preskimming import preSkim
 from PhysicsTools.NanoAODTools.postprocessing.framework.jobreport import JobReport
-
+from PhysicsTools.NanoAODTools.postprocessing.modules.lfv.MyAnalysisCC import *
 class PostProcessor :
     def __init__(self,outputDir,inputFiles,cut=None,branchsel=None,modules=[],compression="LZMA:9",friend=False,postfix=None,
 		 jsonInput=None,noOut=False,justcount=False,provenance=False,haddFileName=None,fwkJobReport=False,histFileName=None,histDirName=None, outputbranchsel=None):
@@ -78,6 +78,8 @@ class PostProcessor :
 	outFileNames=[]
         t0 = time.clock()
 	totEntriesRead=0
+        fnum = 0
+        bigTree = None
 	for fname in self.inputFiles:
 
 	    # open input file
@@ -85,6 +87,11 @@ class PostProcessor :
 
 	    #get input tree
 	    inTree = inFile.Get("Events")
+            if fnum == 0 :
+                bigTree = inTree#.CloneTree(-1)
+            else:
+                bigTree.AddFriend(inTree)
+
 	    totEntriesRead+=inTree.GetEntries()
 	    # pre-skimming
 	    elist,jsonFilter = preSkim(inTree, self.json, self.cut)
@@ -94,13 +101,20 @@ class PostProcessor :
 	    else:
 		print 'Pre-select %d entries out of %s '%(elist.GetN() if elist else inTree.GetEntries(),inTree.GetEntries())
 		
-	    if fullClone:
-		# no need of a reader (no event loop), but set up the elist if available
-		if elist: inTree.SetEntryList(elist)
-	    else:
-		# initialize reader
-		inTree = InputTree(inTree, elist) 
-
+	    #if fullClone:
+            # no need of a reader (no event loop), but set up the elist if available
+            if elist: inTree.SetEntryList(elist)
+	    #else:
+	    #	# initialize reader
+            #		inTree = InputTree(inTree, elist)
+           
+            
+            
+            fnum+=1
+        for m in self.modules:
+            m.addTree(bigTree )
+        print "use addtree function" 
+        '''
 	    # prepare output file
             if not self.noOut:
                 outFileName = os.path.join(self.outputDir, os.path.basename(fname).replace(".root",outpostfix+".root"))
@@ -133,14 +147,14 @@ class PostProcessor :
                 print "Done %s" % outFileName
 	    if self.jobReport:
 		self.jobReport.addInputFile(fname,nall)
-		
+	'''	
 	for m in self.modules: m.endJob()
 	
 	print  totEntriesRead/(time.clock()-t0), "Hz"
 
 
-	if self.haddFileName :
-		os.system("./haddnano.py %s %s" %(self.haddFileName," ".join(outFileNames))) #FIXME: remove "./" once haddnano.py is distributed with cms releases
+	#if self.haddFileName :
+	#	os.system("./haddnano.py %s %s" %(self.haddFileName," ".join(outFileNames))) #FIXME: remove "./" once haddnano.py is distributed with cms releases
 	if self.jobReport :
-		self.jobReport.addOutputFile(self.haddFileName)
+		#self.jobReport.addOutputFile(self.haddFileName)
 		self.jobReport.save()

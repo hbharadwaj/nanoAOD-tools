@@ -5,7 +5,7 @@ from CRABClient.UserUtilities import config
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'NanoPostprocessorLFVtest_Jan13_LFVStVecC_1FilePerJob_FulldatasetTest_noPre'
+config.General.requestName = 'NanoPostprocessorLFVtest_Jan14_LFVStVecC_30FilePerJob_FulldatasetTest_goodPre_properSplitting'
 config.General.transferLogs = True
 config.section_("JobType")
 config.JobType.pluginName = 'Analysis'
@@ -13,7 +13,7 @@ config.JobType.psetName = 'PSet.py'
 config.JobType.outputFiles = [ 'output_hists.root' ]
 config.JobType.scriptExe = 'crab_script.sh'
 # hadd nano will not be needed once nano tools are in cmssw
-config.JobType.inputFiles = ['crab_script_test.py', '../scripts/haddnano.py', "/afs/cern.ch/user/a/asparker/public/LFVTopCode_MyFork/nano_cmssw_mc_try2/CMSSW_10_6_4/src/data/TopLFV/input/RoccoR2017.txt","/afs/cern.ch/user/a/asparker/public/LFVTopCode_MyFork/nano_cmssw_mc_try2/CMSSW_10_6_4/src/data/TopLFV/include/MyAnalysis.h", "/afs/cern.ch/user/a/asparker/public/LFVTopCode_MyFork/nano_cmssw_mc_try2/CMSSW_10_6_4/src/data/TopLFV/lib/main.so", "testMC.txt"  ]
+config.JobType.inputFiles = ['crab_script_test_new.py', '../scripts/haddnano.py', "/afs/cern.ch/user/a/asparker/public/LFVTopCode_MyFork/nano_cmssw_mc_try2/CMSSW_10_6_4/src/data/TopLFV/input/RoccoR2017.txt","/afs/cern.ch/user/a/asparker/public/LFVTopCode_MyFork/nano_cmssw_mc_try2/CMSSW_10_6_4/src/data/TopLFV/include/MyAnalysis.h", "/afs/cern.ch/user/a/asparker/public/LFVTopCode_MyFork/nano_cmssw_mc_try2/CMSSW_10_6_4/src/data/TopLFV/lib/main.so", "testMC.txt"  ]
 
 config.JobType.sendPythonFolder = True
 config.section_("Data")
@@ -32,10 +32,10 @@ config.Data.inputDBS = 'phys03'
 #config.Data.inputDBS = 'global'
 config.Data.splitting = 'FileBased'
 #config.Data.splitting = 'EventAwareLumiBased'
-config.Data.unitsPerJob = 1
+config.Data.unitsPerJob = 30
 #config.Data.totalUnits = 10
 
-config.Data.outLFNDirBase = '/store/user/%s/NanoPosttest_LFVStVecC_Jan12' % ( 'asparker' )
+config.Data.outLFNDirBase = '/store/user/%s/NanoPosttest_Jan13_LFVStVecC' % ( 'asparker' )
 # getUsernameFromSiteDB())
 config.Data.publication = False
 #config.Data.outputDatasetTag = 'NanoTestPost_TT_3perjob_goodOutfiles3'
