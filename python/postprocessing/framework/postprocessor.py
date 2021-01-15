@@ -5,7 +5,7 @@ import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 from PhysicsTools.NanoAODTools.postprocessing.framework.branchselection import BranchSelection
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import InputTree
-from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import eventLoop
+from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import *
 from PhysicsTools.NanoAODTools.postprocessing.framework.output import FriendOutput, FullOutput
 from PhysicsTools.NanoAODTools.postprocessing.framework.preskimming import preSkim
 from PhysicsTools.NanoAODTools.postprocessing.framework.jobreport import JobReport
@@ -79,7 +79,7 @@ class PostProcessor :
         t0 = time.clock()
 	totEntriesRead=0
         fnum = 0
-        bigTree = None
+        #bigTree = None
 	for fname in self.inputFiles:
 
 	    # open input file
@@ -87,10 +87,13 @@ class PostProcessor :
 
 	    #get input tree
 	    inTree = inFile.Get("Events")
-            if fnum == 0 :
-                bigTree = inTree#.CloneTree(-1)
-            else:
-                bigTree.AddFriend(inTree)
+            #if fnum == 0 :
+            #    bigTree = inTree#.CloneTree(-1)
+            #    #bigTree.SetDirectory(0)
+            #else:
+            #    print  "bigTree.AddFriend(inTree)"
+            #    #inTree.SetDirectory(0)
+            #    bigTree.AddFriend(inTree)
 
 	    totEntriesRead+=inTree.GetEntries()
 	    # pre-skimming
@@ -108,13 +111,10 @@ class PostProcessor :
 	    #	# initialize reader
             #		inTree = InputTree(inTree, elist)
            
-            
-            
-            fnum+=1
-        for m in self.modules:
-            m.addTree(bigTree )
-        print "use addtree function" 
-        '''
+        
+       
+      
+            '''
 	    # prepare output file
             if not self.noOut:
                 outFileName = os.path.join(self.outputDir, os.path.basename(fname).replace(".root",outpostfix+".root"))
@@ -130,24 +130,26 @@ class PostProcessor :
             else : 
                 outFile = None
                 outTree = None
-
+            '''
 	    # process events, if needed
-	    if not fullClone:
-		(nall, npass, timeLoop) = eventLoop(self.modules, inFile, outFile, inTree, outTree)
-		print 'Processed %d preselected entries from %s (%s entries). Finally selected %d entries' % (nall, fname, inTree.GetEntries(), npass)
-	    else:
-		print 'Selected %d entries from %s' % (outTree.tree().GetEntries(), fname)
+            print "run treeLoop in postprocessor"
+            #def treeLoop(
+            #modules, inputFile, outputFile, inputTree,  wrappedOutputTree,
+	    nothing = treeLoop(self.modules, inFile, inTree) #, outTree)
+	    #	print 'Processed %d preselected entries from %s (%s entries). Finally selected %d entries' % (nall, fname, inTree.GetEntries(), npass)
+	    #else:
+	    #	print 'Selected %d entries from %s' % (outTree.tree().GetEntries(), fname)
 
 	    # now write the output
-            if self.outputbranchsel:
-                self.outputbranchsel.selectBranches(outTree._tree)
-            if not self.noOut: 
-                outTree.write()
-                outFile.Close()
-                print "Done %s" % outFileName
-	    if self.jobReport:
-		self.jobReport.addInputFile(fname,nall)
-	'''	
+            #if self.outputbranchsel:
+            #    self.outputbranchsel.selectBranches(outTree._tree)
+            #if not self.noOut: 
+            #    outTree.write()
+            #    outFile.Close()
+            #    print "Done %s" % outFileName
+	    #if self.jobReport:
+	    #	self.jobReport.addInputFile(fname,nall)
+		
 	for m in self.modules: m.endJob()
 	
 	print  totEntriesRead/(time.clock()-t0), "Hz"
@@ -156,5 +158,5 @@ class PostProcessor :
 	#if self.haddFileName :
 	#	os.system("./haddnano.py %s %s" %(self.haddFileName," ".join(outFileNames))) #FIXME: remove "./" once haddnano.py is distributed with cms releases
 	if self.jobReport :
-		#self.jobReport.addOutputFile(self.haddFileName)
+		self.jobReport.addOutputFile(self.histFileName)
 		self.jobReport.save()

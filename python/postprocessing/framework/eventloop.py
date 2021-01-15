@@ -26,8 +26,10 @@ class Module(object):
             for obj in self.objs:
                 obj.Write()
             prevdir.cd()
+            print "module endjob"
             if hasattr(self, 'histFile') and self.histFile != None:
                 self.histFile.Close()
+                print "closed histfile"
 
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         pass
@@ -99,3 +101,59 @@ def eventLoop(
     for m in modules:
         m.endFile(inputFile, outputFile, inputTree, wrappedOutputTree)
     return (doneEvents, acceptedEvents, time.time() - t0)
+
+#treeLoop(self.modules, inFile, self.histFile, inTree, self.histDirName)
+def treeLoop(
+        modules, inputFile, inputTree,
+        maxEvents=-1, eventRange=None, progress=(10000, sys.stdout),
+        filterOutput=True
+):
+    wrappedOutputTree = None
+    outputFile = None
+    for m in modules:
+        print "begin file"
+        m.beginFile(inputFile, outputFile, inputTree, wrappedOutputTree)
+
+    t0 = time.time()
+    tlast = t0
+    print "runLoop..."
+    
+    #ROOT.SetOwnership(inputTree, False ) 
+    for m in modules:
+        m.runloop( inputTree )
+    #doneEvents = 0
+    #acceptedEvents = 0
+    #entries = inputTree.entries
+    #if eventRange:
+    #    entries = len(eventRange)
+    #if maxEvents > 0:
+    #    entries = min(entries, maxEvents)
+    #
+    #for ie, i in enumerate(range(entries) if eventRange == None else eventRange):
+    #    if maxEvents > 0 and ie >= maxEvents:
+    #        break
+    #    e = Event(inputTree, i)
+    #    clearExtraBranches(inputTree)
+    #    doneEvents += 1
+    #    ret = True
+    #    for m in modules:
+    #        ret = m.analyze(e)
+    #        if not ret:
+    #            break
+    #    if ret:
+    #        acceptedEvents += 1
+    #    if (ret or not filterOutput) and wrappedOutputTree != None:
+    #        wrappedOutputTree.fill()
+    #    if progress:
+    #        if ie > 0 and ie % progress[0] == 0:
+    #3            t1 = time.time()
+    #            progress[1].write("Processed %8d/%8d entries, %5.2f%% (elapsed time %7.1fs, curr speed %8.3f kHz, avg speed %8.3f kHz), accepted %8d/%8d events (%5.2f%%)\n" % (
+    #                ie, entries, ie / float(0.01 * entries),
+    #                t1 - t0, (progress[0] / 1000.) / (max(t1 - tlast, 1e-9)),
+    ##                ie / 1000. / (max(t1 - t0, 1e-9)),
+    #                acceptedEvents, doneEvents,
+    #                acceptedEvents / (0.01 * doneEvents)))
+    #            tlast = t1
+    for m in modules:
+        m.endFile(inputFile, outputFile, inputTree, wrappedOutputTree)
+    return None #(doneEvents, acceptedEvents, time.time() - t0)

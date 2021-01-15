@@ -27,7 +27,7 @@ print "run postprocessor init"
 
 p = PostProcessor(".",
                   inputFiles(),
-                  "Jet_pt>25 &&  Jet_eta < 2.5  && (nMuon + nElectron) >=3",
+                  " (nMuon + nElectron) >=3 ",
                   modules=modulesList,
                   provenance=True,
                   fwkJobReport=True,

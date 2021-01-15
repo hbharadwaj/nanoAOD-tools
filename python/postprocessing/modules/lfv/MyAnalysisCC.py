@@ -21,23 +21,23 @@ class MyAnalysisCC(Module ):
             print self.elist.GetN()
             self.afileList.SetEntryList(self.elist)
 
-        self.ch = ROOT.TChain("Events")
-        for line in self.afileList :
-            self.ch.Add( line )
-        print "$CMSSW_BASE"
+        #self.ch = ROOT.TChain("Events")
+        #for line in self.afileList :
+        #    self.ch.Add( line )
+        #print "$CMSSW_BASE"
         #print $CMSSW_BASE
-        os.system( "echo $CMSSW_BASE" )
-        base = os.environ['CMSSW_BASE'] + '/src/data'  #"$CMSSW_BASE/src/data"   #"../../../data"  #"$CMSSW_BASE/src/data"
-        print " os.environ['CMSSW_BASE'] + '/src/data'" 
-        print base
+        #os.system( "echo $CMSSW_BASE" )
+        self.base = os.environ['CMSSW_BASE'] + '/src/data'  #"$CMSSW_BASE/src/data"   #"../../../data"  #"$CMSSW_BASE/src/data"
+        #print " os.environ['CMSSW_BASE'] + '/src/data'" 
+        #print base
         #print os.environ['CMSSW_BASE']        
         ROOT.gSystem.Load("libPhysicsToolsNanoAODTools.so")
-        print "Load(BASE/TopLFV/lib/main.so"
-        gSystem.Load("%s/TopLFV/lib/main.so"%(base) )
-        if isdata:
-            gInterpreter.ProcessLine('#include '+ '"%s/TopLFV/include/MyAnalysisData.h"'%(base))
-        else :
-            gInterpreter.ProcessLine('#include '+ '"%s/TopLFV/include/MyAnalysis.h"'%(base))
+        #print "Load(BASE/TopLFV/lib/main.so"
+        gSystem.Load("%s/TopLFV/lib/main.so"%(self.base) )
+        #if isdata:
+        #    gInterpreter.ProcessLine('#include '+ '"%s/TopLFV/include/MyAnalysisData.h"'%(self.base))
+        #else :
+        #    gInterpreter.ProcessLine('#include '+ '"%s/TopLFV/include/MyAnalysis.h"'%(self.base))
 
 
         print("Load C++ MyAnalysis worker module")
@@ -64,16 +64,26 @@ class MyAnalysisCC(Module ):
   
         pass
         
-
-
-    def addTree(self, atree ):
-        self.afileList = atree
+    def runloop(self,  atree ):
+        #self.afileList = atree
+        print "runloop will give ttree to MyAnalysis Loop"
+        ROOT.SetOwnership(atree, False )
+        print atree        
+        self.worker = MyAnalysis( atree ) #self.afileList )
+        self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
+        ROOT.SetOwnership( self.worker, False )
+        print "runloop ran MyAnalysis Loop"
         pass
+
+
+    #def addTree(self, atree ):
+    #    self.afileList = atree
+    #    pass
 
     def beginJob(self, histFile, histDirName):
 
         Module.beginJob(self, histFile, histDirName)
-        #print "beginJob opened histfile"
+        print "beginJob did not open histfile"
         #print self.afileList 
         #self.worker = MyAnalysis( self.afileList)#ch)
         #self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
@@ -85,9 +95,9 @@ class MyAnalysisCC(Module ):
     def endJob(self):#, atree ):
         #print "endJob"
         #print self.ch
-        self.worker = MyAnalysis( self.afileList )
-        self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
-        print " endJob ran Loop function from MYANALYSIS"
+        #self.worker = MyAnalysis( self.afileList )
+        #self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
+        print " endJob ran "
         #print atree
         #self.atree = atree
         #self.worker = MyAnalysis( self.atree ) #self.ch)
@@ -99,11 +109,21 @@ class MyAnalysisCC(Module ):
         pass
 
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
-        self.initReaders(inputTree)  # initReaders must be called in beginFile
-        self.out = wrappedOutputTree
+
+        if self.isdata:
+            gInterpreter.ProcessLine('#include '+ '"%s/TopLFV/include/MyAnalysisData.h"'%(self.base))
+        else :
+            gInterpreter.ProcessLine('#include '+ '"%s/TopLFV/include/MyAnalysis.h"'%(self.base))
+
+
+
+
+        #self.initReaders(inputTree)  # initReaders must be called in beginFile
+        #self.out = wrappedOutputTree
         #self.out.branch("MHTju_pt", "F")
         #self.out.branch("MHTju_phi", "F")
-        
+        print "beginfile"
+        pass
 
 
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
