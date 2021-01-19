@@ -5,12 +5,12 @@ from CRABClient.UserUtilities import config
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'NanoPostprocessorLFVtest_Jan15_DoubleMuon_C_2017_30perjob'
+config.General.requestName = 'NanoPostprocessorLFVtest_Jan19_DoubleMuon_C_2017_3perjob'
 config.General.transferLogs = True
 config.section_("JobType")
 config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = 'PSet.py'
-config.JobType.outputFiles = [ 'output_hists.root' ]
+config.JobType.outputFiles = [ 'output_hists.root', 'tree_Skim.root' ]
 config.JobType.scriptExe = 'crab_script_dm.sh'
 # hadd nano will not be needed once nano tools are in cmssw
 config.JobType.inputFiles = ['crab_script_dm.py', '../scripts/haddnano.py', "/afs/cern.ch/user/a/asparker/public/LFVTopCode_MyFork/nano_cmssw_mc_try2/CMSSW_10_6_4/src/data/TopLFV/input/RoccoR2017.txt","/afs/cern.ch/user/a/asparker/public/LFVTopCode_MyFork/nano_cmssw_mc_try2/CMSSW_10_6_4/src/data/TopLFV/include/MyAnalysis.h", "/afs/cern.ch/user/a/asparker/public/LFVTopCode_MyFork/nano_cmssw_mc_try2/CMSSW_10_6_4/src/data/TopLFV/lib/main.so", "testMC.txt"  ]
@@ -22,13 +22,13 @@ config.Data.inputDBS = 'phys03'
 #config.Data.inputDBS = 'global'
 config.Data.splitting = 'FileBased'
 #config.Data.splitting = 'EventAwareLumiBased'
-config.Data.unitsPerJob = 30
+config.Data.unitsPerJob = 3
 #config.Data.totalUnits = 10
 
-config.Data.outLFNDirBase = '/store/user/%s/NanoPosttest_Jan13_DoubleMuon_C_2017' % ( 'asparker' )
+config.Data.outLFNDirBase = '/store/user/%s/NanoPosttest_Jan19_DoubleMuon_C_2017' % ( 'asparker' )
 # getUsernameFromSiteDB())
 config.Data.publication = False
-config.Data.outputDatasetTag = 'NanoTestPost_Jan15_doublemu_C_2017'
+config.Data.outputDatasetTag = 'NanoTestPost_Jan19_doublemu_C_2017'
 config.section_("Site")
 #config.Site.storageSite = "T2_DE_DESY"
 

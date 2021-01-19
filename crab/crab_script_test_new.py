@@ -27,10 +27,10 @@ print "run postprocessor init"
 
 p = PostProcessor(".",
                   inputFiles(),
-                  " (nMuon + nElectron) >=3 ",
                   modules=modulesList,
                   provenance=True,
                   fwkJobReport=True,
+                  haddFileName= 'tree_Skim.root',
                   histFileName= 'output_hists.root', histDirName = 'lfv',
                   jsonInput=runsAndLumis())
 

@@ -114,7 +114,7 @@ class PostProcessor :
         
        
       
-            '''
+
 	    # prepare output file
             if not self.noOut:
                 outFileName = os.path.join(self.outputDir, os.path.basename(fname).replace(".root",outpostfix+".root"))
@@ -130,7 +130,7 @@ class PostProcessor :
             else : 
                 outFile = None
                 outTree = None
-            '''
+            
 	    # process events, if needed
             print "run treeLoop in postprocessor"
             #def treeLoop(
@@ -156,7 +156,7 @@ class PostProcessor :
 
 
 	#if self.haddFileName :
-	#	os.system("./haddnano.py %s %s" %(self.haddFileName," ".join(outFileNames))) #FIXME: remove "./" once haddnano.py is distributed with cms releases
+        #    os.system("./haddnano.py %s %s" %(self.haddFileName," ".join(outFileNames))) #FIXME: remove "./" once haddnano.py is distributed with cms releases
 	if self.jobReport :
-		self.jobReport.addOutputFile(self.histFileName)
-		self.jobReport.save()
+            self.jobReport.addOutputFile(self.haddFileName) # outFileNames[0]
+            self.jobReport.save()
