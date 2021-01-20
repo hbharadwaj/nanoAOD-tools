@@ -143,20 +143,20 @@ class PostProcessor :
 	    # now write the output
             #if self.outputbranchsel:
             #    self.outputbranchsel.selectBranches(outTree._tree)
-            #if not self.noOut: 
-            #    outTree.write()
-            #    outFile.Close()
-            #    print "Done %s" % outFileName
+            if not self.noOut: 
+                outTree.write()
+                outFile.Close()
+                print "Done %s" % outFileName
 	    #if self.jobReport:
-	    #	self.jobReport.addInputFile(fname,nall)
+	    # 	self.jobReport.addInputFile(fname, 0 )
 		
 	for m in self.modules: m.endJob()
 	
 	print  totEntriesRead/(time.clock()-t0), "Hz"
 
 
-	#if self.haddFileName :
-        #    os.system("./haddnano.py %s %s" %(self.haddFileName," ".join(outFileNames))) #FIXME: remove "./" once haddnano.py is distributed with cms releases
+	if self.haddFileName :
+            os.system("./haddnano.py %s %s" %(self.haddFileName," ".join(outFileNames))) #FIXME: remove "./" once haddnano.py is distributed with cms releases
 	if self.jobReport :
             self.jobReport.addOutputFile(self.haddFileName) # outFileNames[0]
             self.jobReport.save()
