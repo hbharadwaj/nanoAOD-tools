@@ -16,11 +16,52 @@ Please never commit neither the build directory, nor the empty init.py files cre
 
 ## Checkout instructions: CMSSW
 
-    cd $CMSSW_BASE/src
-    git clone https://github.com/cms-nanoAOD/nanoAOD-tools.git PhysicsTools/NanoAODTools
-    cd PhysicsTools/NanoAODTools
-    cmsenv
-    scram b
+cmsrel CMSSW_10_6_4
+cd CMSSW_10_6_4/src/
+cmsenv
+mkdir data
+cd data
+git clone -b nano_Jan20  https://github.com/UBParker/Analysis.git TopLFV
+cd .. (in CMSSW/src/)
+git clone -b nano_Jan20 https://github.com/UBParker/nanoAOD-tools.git PhysicsTools/NanoAODTools
+scram b -j 5
+cd data/TopLFV
+make all
+cd PhysicsTools/NanoAODTools/crab
+
+source /cvmfs/cms.cern.ch/common/crab-setup.sh
+
+## Local Testing
+
+for faster local testing you can download a file to use or just copy mine from here :
+
+MC :  scp /afs/cern.ch/user/a/asparker/public/LFVTopCode_MyFork/new_mc_nanocmssw_Jan2021/data/CMSSW_10_6_4/src/PhysicsTools/NanoAODTools/crab/tree_1.root .
+Data:  scp /afs/cern.ch/user/a/asparker/public/LFVTopCode_MyFork/new_mc_nanocmssw_Jan2021/data/CMSSW_10_6_4/src/PhysicsTools/NanoAODTools/crab/tree_15.root .
+
+To perform a local test on MC (make sure PSet.py is pointing to a MC file e.g. tree_1.root https://github.com/UBParker/nanoAOD-tools/blob/nano_Jan20/crab/PSet.py#L13 :
+
+python crab_script_test_new.py 0
+
+
+local test on data (make sure PSet.py is pointing to a data file as in example above): 
+
+python crab_script_dm.py 0 
+
+## Submit a CRAB job 
+
+If that is successful then to run a CRAB job, first edit the script:
+
+- to use your username instead of mine
+https://github.com/UBParker/nanoAOD-tools/blob/nano_cmssw/crab/crab_cfg_TT.py#L28
+
+- to write the files to wherever you have space  : 
+https://github.com/UBParker/nanoAOD-tools/blob/nano_cmssw/crab/crab_cfg_TT.py#L35
+
+-and then change the input dataset to something else we need e.g. https://github.com/cms-top/topNanoAOD-datasets/blob/master/datasets_v6-1-X.yml  sample: 
+https://github.com/UBParker/nanoAOD-tools/blob/nano_cmssw/crab/crab_cfg_TT.py#L20
+
+Now you can submit a CRAB job : crab submit crab_cfg_doubleMu.py
+
 
 ## General instructions to run the post-processing step
 
