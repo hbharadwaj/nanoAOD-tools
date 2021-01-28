@@ -49,6 +49,8 @@ python crab_script_dm.py 0
 
 ## Submit a CRAB job 
 
+python  submit_crab_data.py --e 2017 --d /DoubleMuon/piedavid-Run2017B-31Mar2018-v1_TopNanoAODv6-1-1_2017-9721c24ccc7f925c513e24ff74941177/USER
+
 If that is successful then to run a CRAB job, first edit the script:
 
 - to use your username instead of mine
