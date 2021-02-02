@@ -1,17 +1,37 @@
 import argparse
 import subprocess
+import sys
+import os
+import readline
+import string
+import nano_files_2017
+from GFAL_GetROOTfiles import *
+from xrootD_GetROOTfiles import *
+
+
 
 # set up an argument parser
 parser = argparse.ArgumentParser()
 parser.add_argument('--n', dest='DATE')# Name tag for data, I use the day I submitted the CRAB jobs
 parser.add_argument('--e', dest='ERA')
-parser.add_argument('--d', dest = 'DATASET') # /DoubleMuon/piedavid-Run2017C-31Mar2018-v1_TopNanoAODv6-1-1_2017-9721c24ccc7f925c513e24ff74941177/USER
+parser.add_argument('--d', dest = 'DATASET') # /DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/piedavid-TopNanoAODv6-1-1_2017-a11761155c05d04d6fed5a2401fa93e8/USER  
 ARGS = parser.parse_args()
+
+SAMPLES = {}
+
+SAMPLES.update(nano_files_2017.mc2017_samples)
+
+
+# /DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/piedavid-TopNanoAODv6-1-1_2017-a11761155c05d04d6fed5a2401fa93e8/USER  
 
 ### This scrip makes all of the files needed to submit the CRAB job:
 ### The CRAB config - crabConfig.py
 ### The scriptexe - runPostProcessor.sh
 ### The crab script (that runs the nanaod-tools postprocessor on the nano ntuples) - runPostProcessor.py
+#for key, value in SAMPLES.items():
+
+
+#    ARGS.DATASET = samp
 
 splits = ARGS.DATASET.split('/')
 print splits
@@ -31,6 +51,13 @@ print id3
 
 print idname
 
+
+for key, val in SAMPLES.items() 
+
+    if key in idname : 
+        print "Success!!!!"
+        print idname
+        print key
 
 
 # make a CRAB config file with template arguments
