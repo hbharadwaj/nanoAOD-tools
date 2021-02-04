@@ -1,4 +1,5 @@
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
+from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetSmearer import jetSmearer
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 from ROOT import TChain, TSelector, TTree
@@ -52,15 +53,50 @@ class MyAnalysisCC(Module ):
         #else :
         #elif self.histFileName is not None and self.histDirName is not None:
         #self.histFileName = "output_hists.root"
-        #self.histFile = ROOT.TFile.Open(self.histFileName, "RECREATE")
-        #print "beginjob"
-        #Module.beginJob(self, self.histFile , "lfv")    
-        #self.worker = MyAnalysis( self.ch)
-        #print "loop"
         print self.loopInfo
+
         #self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
         #print " _init_ ran Loop function from MYANALYSIS"
-        
+
+
+        #JMR - make sure the numbers correspond with jetmetUncertainties.py
+        self.jmrVals = []
+        if '16' in self.loopInfo[3]  :
+            self.jmrVals = [1.0, 1.2, 0.8] #nominal, up, down
+        elif '17' in self.loopInfo[3]  :
+            self.jmrVals = [1.09, 1.14, 1.04]
+        elif '18' in self.loopInfo[3]  :
+            self.jmrVals = [1.108, 1.142, 1.074]
+        print "JMR values:"
+        print self.jmrVals
+
+
+        #JER for MC
+        #global tags
+        globalTag = "Summer16_07Aug2017_V11_MC" #2016
+        if '17' in self.loopInfo[3] :
+            globalTag = "Fall17_17Nov2017_V32_MC" #2017
+        elif '18' in self.loopInfo[3]  :
+            globalTag = "Autumn18_V19_MC"
+
+        #jer input files # Fall17_17Nov2017_V32 94X_mc2017_realistic_v17
+        self.jerInputFileName = "Summer16_25nsV1_MC_PtResolution_AK4PFPuppi.txt"
+        self.jerUncertaintyInputFileName = "Summer16_25nsV1_MC_SF_AK4PFPuppi.txt"
+        if '17MC' in self.loopInfo[3] :
+            self.jerInputFileName = "Fall17_V3_MC_PtResolution_AK4PFPuppi.txt"
+            self.jerUncertaintyInputFileName = "Fall17_V3_MC_SF_AK4PFPuppi.txt"
+        elif '18MC' in self.loopInfo[3] :
+            self.jerInputFileName = "Autumn18_V7b_MC_PtResolution_AK4PFPuppi.txt"
+            self.jerUncertaintyInputFileName = "Autumn18_V7b_MC_SF_AK4PFPuppi.txt"    
+
+
+
+        self.jetSmearer = None
+        if 'mc' in self.loopInfo[1] : self.jetSmearer = jetSmearer(globalTag, "AK4PFPuppi", self.jerInputFileName, self.jerUncertaintyInputFileName, self.jmrVals)
+
+        print "JetSmearer"
+        print self.jetSmearer 
+
   
         pass
         
@@ -70,7 +106,7 @@ class MyAnalysisCC(Module ):
         ROOT.SetOwnership(atree, False )
         print atree        
         self.worker = MyAnalysis( atree ) #self.afileList )
-        self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
+        self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7] , self.jetSmearer )
         ROOT.SetOwnership( self.worker, False )
         print "runloop ran MyAnalysis Loop"
         pass
@@ -90,23 +126,15 @@ class MyAnalysisCC(Module ):
         #print " beginJob ran Loop function from MYANALYSIS"
         #self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
         #print " beginJob ran Loop function from MYANALYSIS"
-        pass
 
-    def endJob(self):#, atree ):
-        #print "endJob"
-        #print self.ch
-        #self.worker = MyAnalysis( self.afileList )
-        #self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
-        print " endJob ran "
-        #print atree
-        #self.atree = atree
-        #self.worker = MyAnalysis( self.atree ) #self.ch)
-        #self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
-        #print " endJob ran Loop function from MYANALYSIS"
-        
+        if 'mc' in self.loopInfo[1] :  self.jetSmearer.beginJob()
+  
+    def endJob(self):
 
+        if 'mc' in self.loopInfo[1] :  self.jetSmearer.endJob()
 
         pass
+
 
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
 

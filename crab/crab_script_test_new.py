@@ -21,7 +21,7 @@ ch = ROOT.TChain("Events")
 
 
 print "init MyAnalysis class"
-modulesList.append( MyAnalysisCC( False , ch ,  [ "output_hists.root",  "mc" , "" , "2017" , "" , 0.0512, 41.53, 500000   ]))
+modulesList.append( MyAnalysisCC( False , ch ,  [ "output_hists.root",  "mc" , "" , "2017" , "" , 0.04  , 41.53, 500000   ]))
 
 print "run postprocessor init"
 
