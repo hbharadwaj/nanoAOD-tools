@@ -101,7 +101,7 @@ def eventLoop(
     for m in modules:
         m.endFile(inputFile, outputFile, inputTree, wrappedOutputTree)
     return (doneEvents, acceptedEvents, time.time() - t0)
-
+    
 #treeLoop(self.modules, inFile, self.histFile, inTree, self.histDirName)
 def treeLoop(
         modules, inputFile, inputTree,

@@ -38,6 +38,11 @@ class MyAnalysisCC(Module ):
         #    gInterpreter.ProcessLine('#include '+ '"%s/TopLFV/include/MyAnalysisData.h"'%(self.base))
         #else :
         #    gInterpreter.ProcessLine('#include '+ '"%s/TopLFV/include/MyAnalysis.h"'%(self.base))
+        if self.isdata:
+            gInterpreter.ProcessLine('#include '+ '"%s/TopLFV/include/MyAnalysisData.h"'%(self.base))
+        else :
+            gInterpreter.ProcessLine('#include '+ '"%s/TopLFV/include/MyAnalysis.h"'%(self.base))
+
 
 
         print("Load C++ MyAnalysis worker module")
@@ -70,6 +75,7 @@ class MyAnalysisCC(Module ):
         ROOT.SetOwnership(atree, False )
         print atree        
         self.worker = MyAnalysis( atree ) #self.afileList )
+        print "now to run the Loop..."
         self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
         ROOT.SetOwnership( self.worker, False )
         print "runloop ran MyAnalysis Loop"
@@ -109,11 +115,6 @@ class MyAnalysisCC(Module ):
         pass
 
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
-
-        if self.isdata:
-            gInterpreter.ProcessLine('#include '+ '"%s/TopLFV/include/MyAnalysisData.h"'%(self.base))
-        else :
-            gInterpreter.ProcessLine('#include '+ '"%s/TopLFV/include/MyAnalysis.h"'%(self.base))
 
 
 
