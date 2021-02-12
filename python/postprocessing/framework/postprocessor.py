@@ -84,7 +84,7 @@ class PostProcessor :
 
         ## hadd all input files so we can loop just once
 
-        cmd = 'haddnano.py ' + 'hadded'+self.inputFiles[0] + '   '
+        cmd = './haddnano.py ' + 'haddedtree.root ' + '   '
         for fname in self.inputFiles:
             #inChain.Add( fname )
             cmd += (fname + ' ')
@@ -93,7 +93,7 @@ class PostProcessor :
         os.system(cmd) 
 
 
-        inFile = ROOT.TFile.Open('hadded'+self.inputFiles[0]) 
+        inFile = ROOT.TFile.Open('haddedtree.root')
 
 
         inTree = inFile.Get("Events")
