@@ -26,7 +26,7 @@ def GFAL_GetROOTfiles( path, gfalstr = "root://cms-xrd-global.cern.ch/" ):
         #    #print "FILE X : {}".format(fn)            
         if '.root' in fn :                   
             rootfiles.append( xrdstr +  path + fn )
-        if v :  print "Adding to txt file :  {}".format( xrdstr + path + fn  )
+        #if v :  print "Adding to txt file :  {}".format( xrdstr + path + fn  )
 
 
     return rootfiles
