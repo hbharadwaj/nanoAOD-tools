@@ -48,7 +48,7 @@ SAMPLES.update(nano_files_2017.data2017_samples)
 
 ## set to thi for testing
 #'2017_ST_atW'
-ARGS.SELECTED = '2017_F_DoubleMu'   #'2017_LFVStVecU' #'2017_ST_atW'
+ARGS.SELECTED = '2017_C_DoubleMu'   #'2017_LFVStVecU' #'2017_ST_atW'
 #data2017_samples['2017_F_DoubleMu'] = [['/DoubleMuon/piedavid-Run2017F-31Mar2018-v1_TopNanoAODv6-1-1_2017-9721c24ccc7f925c513e24ff74941177/USER','/store/user/piedavid/topNanoAOD/v6-1-1/2017/DoubleMuon/TopNanoAODv6-1-1_2017/200615_080726/0000/'], 'data','DoubleMu','2017', 'F','1','1','1']
 
 
@@ -281,8 +281,8 @@ fi
     open('%s/crab_script_%s.sh' % (dirname, idname), 'w').write(BASH_SCRIPT.format(**ARGS.__dict__))
 
     #use crabConfig.py- run it, and remove it
-
-    subprocess.call('crab submit -c %s/crabConfig%s.py' % (dirname, idname), shell=True)
-    subprocess.call('echo "crab submit -c %s/crabConfig%s.py" ' % (dirname, idname), shell=True)
+    os.system('cd  '+ dirname )
+    subprocess.call('crab submit -c %s/crabConfig%s.py' % ( dirname,  idname), shell=True)
+    subprocess.call('echo "crab submit -c %s/crabConfig%s.py" ' % ( dirname, idname), shell=True)
     #subprocess.call('rm crabConfig.py', shell=True)
 
