@@ -103,6 +103,20 @@ class PostProcessor :
 
 
         totEntriesRead+=inTree.GetEntries()
+        # pre-skimming
+        elist,jsonFilter = preSkim(inTree, self.json, self.cut)
+        #if self.justcount:
+        #    print 'Would select %d entries from %s'%(elist.GetN() if elist else inTree.GetEntries(), fname)
+        #    #continue
+        #else:
+        print 'Pre-select %d entries out of %s '%(elist.GetN() if elist else inTree.GetEntries(),inTree.GetEntries())
+        
+        if fullClone:
+            # no need of a reader (no event loop), but set up the elist if available
+            if elist: inTree.SetEntryList(elist)
+        else:
+            # initialize reader
+            inTree = InputTree(inTree, elist)
 
 
         if not self.noOut:
@@ -127,21 +141,7 @@ class PostProcessor :
         print "Run These modules with python loops :"
         print self.modules[:-1]
         (nall, npass, timeLoop) = eventLoop(self.modules[:-1], inFile, outFile, inTree, outTree)
-        
-        # pre-skimming
-        elist,jsonFilter = preSkim(inTree, self.json, self.cut)
-        #if self.justcount:
-        #    print 'Would select %d entries from %s'%(elist.GetN() if elist else inTree.GetEntries(), fname)
-        #    #continue
-        #else:
-        print 'Pre-select %d entries out of %s '%(elist.GetN() if elist else inTree.GetEntries(),inTree.GetEntries())
-        
-        if fullClone:
-            # no need of a reader (no event loop), but set up the elist if available
-            if elist: inTree.SetEntryList(elist)
-        else:
-            # initialize reader
-            inTree = InputTree(inTree, elist)
+        elist,jsonFilter = preSkim(inTree, self.json, self.cut)# the "eventLoop" function cancels the entrylist, need to preskim again.
 
         print "Run This module with C ++ loops :"
         print [self.modules[-1]]
