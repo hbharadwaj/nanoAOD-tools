@@ -104,7 +104,7 @@ def eventLoop(
     
 #treeLoop(self.modules, inFile, self.histFile, inTree, self.histDirName)
 def treeLoop(
-        modules, inputFile, inputTree,
+        modules, inputFile, inputTree, elist,
         maxEvents=-1, eventRange=None, progress=(10000, sys.stdout),
         filterOutput=True
 ):
@@ -120,7 +120,7 @@ def treeLoop(
     
     #ROOT.SetOwnership(inputTree, False ) 
     for m in modules:
-        m.runloop( inputTree )
+        m.runloop( inputTree, elist )
     #doneEvents = 0
     #acceptedEvents = 0
     #entries = inputTree.entries
