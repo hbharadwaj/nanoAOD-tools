@@ -103,20 +103,6 @@ class PostProcessor :
 
 
         totEntriesRead+=inTree.GetEntries()
-        # pre-skimming
-        elist,jsonFilter = preSkim(inTree, self.json, self.cut)
-        #if self.justcount:
-        #    print 'Would select %d entries from %s'%(elist.GetN() if elist else inTree.GetEntries(), fname)
-        #    #continue
-        #else:
-        print 'Pre-select %d entries out of %s '%(elist.GetN() if elist else inTree.GetEntries(),inTree.GetEntries())
-        
-        if fullClone:   
-            # no need of a reader (no event loop), but set up the elist if available    
-            if elist: inTree.SetEntryList(elist)    
-        else:   
-            # initialize reader 
-            inTree = InputTree(inTree, elist) 
 
 
         if not self.noOut:
@@ -141,14 +127,28 @@ class PostProcessor :
         print "Run These modules with python loops :"
         print self.modules[:-1]
         (nall, npass, timeLoop) = eventLoop(self.modules[:-1], inFile, outFile, inTree, outTree)
-
+        
+        # pre-skimming
+        elist,jsonFilter = preSkim(inTree, self.json, self.cut)
+        #if self.justcount:
+        #    print 'Would select %d entries from %s'%(elist.GetN() if elist else inTree.GetEntries(), fname)
+        #    #continue
+        #else:
+        print 'Pre-select %d entries out of %s '%(elist.GetN() if elist else inTree.GetEntries(),inTree.GetEntries())
+        
+        if fullClone:
+            # no need of a reader (no event loop), but set up the elist if available
+            if elist: inTree.SetEntryList(elist)
+        else:
+            # initialize reader
+            inTree = InputTree(inTree, elist)
 
         print "Run This module with C ++ loops :"
         print [self.modules[-1]]
         ## by default in nanoAOD-tools the loop is in python,
         ## the module below has the loop run in C++
         ## only run this on last module in the list [self.modules[-1] which is our modules/lfv/MyAnalysisCC module
-        nothing = treeLoop([self.modules[-1]], inFile, inTree) #, outTree)
+        nothing = treeLoop([self.modules[-1]], inFile, inTree, elist) #, outTree)
 
         
 

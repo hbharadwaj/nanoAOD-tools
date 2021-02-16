@@ -69,12 +69,12 @@ class MyAnalysisCC(Module ):
   
         pass
         
-    def runloop(self,  atree ):
+    def runloop(self,  atree , alist):
         #self.afileList = atree
         print "runloop will give ttree to MyAnalysis Loop"
         ROOT.SetOwnership(atree, False )
         print atree        
-        self.worker = MyAnalysis( atree ) #self.afileList )
+        self.worker = MyAnalysis( atree, alist ) #self.afileList )
         print "now to run the Loop..."
         self.worker.Loop( self.loopInfo[0] , self.loopInfo[1], self.loopInfo[2], self.loopInfo[3], self.loopInfo[4], self.loopInfo[5], self.loopInfo[6], self.loopInfo[7]  )
         ROOT.SetOwnership( self.worker, False )
