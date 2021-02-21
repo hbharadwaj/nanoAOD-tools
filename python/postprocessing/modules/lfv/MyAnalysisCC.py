@@ -34,14 +34,10 @@ class MyAnalysisCC(Module ):
         ROOT.gSystem.Load("libPhysicsToolsNanoAODTools.so")
         #print "Load(BASE/TopLFV/lib/main.so"
         gSystem.Load("%s/TopLFV/lib/main.so"%(self.base) )
-        #if isdata:
-        #    gInterpreter.ProcessLine('#include '+ '"%s/TopLFV/include/MyAnalysisData.h"'%(self.base))
-        #else :
-        #    gInterpreter.ProcessLine('#include '+ '"%s/TopLFV/include/MyAnalysis.h"'%(self.base))
-        if self.isdata:
-            gInterpreter.ProcessLine('#include '+ '"%s/TopLFV/include/MyAnalysisData.h"'%(self.base))
-        else :
-            gInterpreter.ProcessLine('#include '+ '"%s/TopLFV/include/MyAnalysis.h"'%(self.base))
+        
+        gInterpreter.ProcessLine('#include '+ '"%s/TopLFV/include/MyAnalysis.h"'%(self.base))
+        
+    
 
 
 
