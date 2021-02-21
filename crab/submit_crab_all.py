@@ -29,6 +29,7 @@ parser.add_argument('--mod', dest = 'MCORDATA', default= None)
 parser.add_argument('--isd', dest = 'ISDATA', default= None) 
 parser.add_argument('--dt', dest = 'DATATYPE', default= None) 
 parser.add_argument('--l', dest = 'LETTER', default= None) 
+parser.add_argument('--id', dest='ID', default= None)
 
 ARGS = parser.parse_args()
 
@@ -48,16 +49,33 @@ SAMPLES.update(nano_files_2017.data2017_samples)
 
 ## set to thi for testing
 #'2017_ST_atW'
-ARGS.SELECTED = '2017_C_DoubleMu'   #'2017_LFVStVecU' #'2017_ST_atW'
+ARGS.SELECTED = '2017_DYM10to50'  #'2017_C_DoubleMu'   #'2017_LFVStVecU' #'2017_ST_atW'
 #data2017_samples['2017_F_DoubleMu'] = [['/DoubleMuon/piedavid-Run2017F-31Mar2018-v1_TopNanoAODv6-1-1_2017-9721c24ccc7f925c513e24ff74941177/USER','/store/user/piedavid/topNanoAOD/v6-1-1/2017/DoubleMuon/TopNanoAODv6-1-1_2017/200615_080726/0000/'], 'data','DoubleMu','2017', 'F','1','1','1']
 
 
-dirname = 'CRABtasks'
+dirname = 'CRABtasks' ## If we want to change this then we should make it an ARG so we can edit name is script below
 os.system('mkdir '+ dirname )
 print "make CRABtasks directory to store CRAB submit scripts"
 published = True
 
+SUBMIT_SCRIPT = '''                                                                                                                                       
+#!/usr/bin/env python                                                                                                                                        
+
+import os, subprocess                                                                                                                                                  
+print "Now submitting your CRAB jobs to find the LFV Top selected events from our TOP nanoAOD samples"
+
+'''
+
+
+# below is stricture of input data for reference:
+
 # [['/ST_tW_antitop_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/schoef-TopNanoAODv6-1-1_2016-88146d75cb10601530484643de5f7795/USER','/store/group/phys_top/topNanoAOD/v6-1-1/2017/ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8/TopNanoAODv6-1-1_2017/200610_154434/0000/'], 'mc','','2017', '','19.47','41.53','11271078']
+
+#mc2017_samples['2017_DYM10to50'] = [['/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/piedavid-TopNanoAODv6-1-1_2017-a11761155c05d04d6fed5a2401fa93e8USER','/store/user/piedavid/topNanoAOD/v6-1-1/2017/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/TopNanoAODv6-1-1_2017/200613_065556/0000/','/store/#u#\
+#ser/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201104_172003/0000/'], 'mc','','2017', '','18610','41.53','39521230'] ## '78,994#\
+#,955' ## <-  is event number from miniaod, we must be missing an extension                                                                                    
+
+
 
 for key, item in SAMPLES.items() :
 #    ARGS.DATASET = samp
@@ -99,7 +117,7 @@ for key, item in SAMPLES.items() :
     if len(dataset) > 1 :
         # if there is more than 1 file location or dataset in the let then look thorugh them all
         # if the first one ends in USER then it is a dataset name
-
+        
         print splits
         if 'USER' in splits:
             ARGS.DATASET = dataset[0]
@@ -109,7 +127,22 @@ for key, item in SAMPLES.items() :
             ARGS.DATASET = dataset[0]
             published = False
             print "Dataset location was given so CRAB submission will use files in that location to submit"            
+ 
         print "WARNING: If any dataset has more than 1 input dataset or file location this script is only submitting the first, fix this soon..."
+        if ( len(dataset) > 2  or  (published == False and len(dataset) == 2  ) ):
+            if 'USER' in splits:
+               
+                ARGS.DATASET = [ dataset[1]  , dataset[2]  ]
+                ### if there is more than 1 dataset, eg. if there are extensions to the MC, 
+                ### then usually, 1st in list is the dataset name
+                ### 2nd entry is basically a duplicate, it is the file location of that same datset
+                ### 3rd entry is the location of the extension files, usually asparker cms eos space bc we created those ourselves so they are unpublished
+        if ( published == False and len(dataset) == 2   ):
+           
+            ARGS.DATASET = [ dataset[0]  , dataset[1]  ]
+
+            
+
 
 
 
@@ -158,9 +191,9 @@ config.section_("JobType")
 config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = 'PSet.py'
 config.JobType.outputFiles = [ 'output_hists.root', 'tree_Skim.root' ]
-config.JobType.scriptExe = '%s/crab_script_%s.sh' % (dirname, idname )
+config.JobType.scriptExe = 'crab_script_%s.sh' % ( idname )
     # hadd nano will not be needed once nano tools are in cmssw                                                                                                                                                        
-config.JobType.inputFiles = ['%s/crab_script_%s.py' % (dirname , idname), '../scripts/haddnano.py', "/afs/cern.ch/user/a/asparker/public/LFVTopCode_MyFork/new_mc_nanocmssw_Jan2021/data/CMSSW_10_6_4/src/data/TopLFV/input/RoccoR2017.txt","/afs/cern.ch/user/a/asparker/public/LFVTopCode_MyFork/new_mc_nanocmssw_Jan2021/data/CMSSW_10_6_4/src/data/TopLFV/include/MyAnalysis.h", "/afs/cern.ch/user/a/asparker/public/LFVTopCode_MyFork/new_mc_nanocmssw_Jan2021/data/CMSSW_10_6_4/src/data/TopLFV/lib/main.so", "testMC.txt"  ]
+config.JobType.inputFiles = ['crab_script_%s.py' % ( idname), "/afs/cern.ch/user/a/asparker/public/LFVTopCode_MyFork/Feb18/CMSSW_10_6_4/src/data/TopLFV/input/RoccoR2017.txt","/afs/cern.ch/user/a/asparker/public/LFVTopCode_MyFork/Feb18/CMSSW_10_6_4/src/data/TopLFV/include/MyAnalysis.h", "/afs/cern.ch/user/a/asparker/public/LFVTopCode_MyFork/Feb18/CMSSW_10_6_4/src/data/TopLFV/lib/main.so" ]
 
 config.JobType.sendPythonFolder = True
 config.JobType.allowUndistributedCMSSW = True
@@ -171,10 +204,18 @@ config.Data.inputDataset = '{DATASET}'
 '''
 
 
-    if not published :
-        print "getting files for unpublished submission : "
-        ARGS.DATASET = GFAL_GetROOTfiles( dataset[0] )
-        #print ARGS.DATASET
+    if (not published or len(ARGS.DATASET) == 2 ):
+        if len(ARGS.DATASET) == 1 :
+            print "getting files for unpublished submission : "
+            ARGS.DATASET = GFAL_GetROOTfiles( dataset[0] )
+        else :
+           df = [] #None
+           for d in ARGS.DATASET:
+               tdf = GFAL_GetROOTfiles( d )
+               df += tdf
+           ARGS.DATASET = df
+           print ARGS.DATASET
+        ## Now that we have the input files, we can make the file input part of the CRAB cfg file         
         CRAB_CFG_UNPUB= '''
 config.section_("Data")                                                                                                                             
 
@@ -225,7 +266,14 @@ modulesList = []
 from PhysicsTools.NanoAODTools.postprocessing.modules.lfv.MyAnalysisCC import *
 
 
+from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetmetHelperRun2 import *
+
+
 ch = ROOT.TChain("Events")
+if not {ISDATA} :
+    jmeCorrections = createJMECorrector(True, "2017", "", "Total", "AK4PFchs")
+    modulesList.append( jmeCorrections() )
+
 modulesList.append( MyAnalysisCC( '{ISDATA}'  , ch , [ "output_hists.root",   '{MCORDATA}' ,'{DATATYPE}', '{ERA}' , '{LETTER}' , {XSEC}, {LUMI} , {NEV} ] ))
 
 
@@ -272,7 +320,13 @@ mv module $CMSSW_BASE/module
 mv python $CMSSW_BASE/python
 
 echo Found Proxy in: $X509_USER_PROXY
-python '%s/crab_script_%s.py' % ( 'CRABtasks' , '{SELECTED}') $1
+
+selected=('{SELECTED}')
+py_command=('crab_script_')
+py_command2=('.py')
+echo "$py_command""$selected""$py_command2" $1
+python "$py_command""$selected""$py_command2" $1
+
 fi
 
 
@@ -280,9 +334,28 @@ fi
     '''
     open('%s/crab_script_%s.sh' % (dirname, idname), 'w').write(BASH_SCRIPT.format(**ARGS.__dict__))
 
-    #use crabConfig.py- run it, and remove it
-    os.system('cd  '+ dirname )
-    subprocess.call('crab submit -c %s/crabConfig%s.py' % ( dirname,  idname), shell=True)
-    subprocess.call('echo "crab submit -c %s/crabConfig%s.py" ' % ( dirname, idname), shell=True)
-    #subprocess.call('rm crabConfig.py', shell=True)
+    
+    ARGS.ID = idname 
 
+    subCommand = '''                                                                                                                                         
+idname = '{ID}'
+print " Submitting CRAB job for dataset : %s " % ( idname  )
+subprocess.call('crab submit -c crabConfig%s.py' % (  idname  ), shell=True)
+subprocess.call('echo "crab submit -c crabConfig%s.py" ' % (  idname  ), shell=True)
+
+
+'''
+    SUBMIT_SCRIPT += subCommand
+
+subprocess.call('cp PSet.py %s/PSet.py' % (dirname), shell=True)
+subprocess.call('cd %s' % (dirname), shell=True)
+subprocess.call('ln -s $CMSSW_BASE/src/PhysicsTools/NanoAODTools/scripts/haddnano.py .', shell=True)
+    
+open('%s/crab_submitter.py' % (dirname), 'w').write(SUBMIT_SCRIPT.format(**ARGS.__dict__))
+print "You have successfully created CRAB submit scripts =D"
+print "now you need to submit your jobs"
+print "get a grid proxy by doing : "
+print "grid-proxy-init --voms cms"
+print "then cd to the CRABtasks directory and run:"
+print "python crab_submitter.py"
+print "That script will contain commands to run all of the scripts you just created..."
