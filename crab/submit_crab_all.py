@@ -194,7 +194,7 @@ config.JobType.psetName = 'PSet.py'
 config.JobType.outputFiles = [ 'output_hists.root', 'tree_Skim.root' ]
 config.JobType.scriptExe = 'crab_script_%s.sh' % ( idname )
     # hadd nano will not be needed once nano tools are in cmssw                                                                                                                                                        
-config.JobType.inputFiles = ['crab_script_%s.py' % ( idname), "/afs/cern.ch/user/a/asparker/public/LFVTopCode_MyFork/Feb18/CMSSW_10_6_4/src/data/TopLFV/input/RoccoR2017.txt","/afs/cern.ch/user/a/asparker/public/LFVTopCode_MyFork/Feb18/CMSSW_10_6_4/src/data/TopLFV/include/MyAnalysis.h", "/afs/cern.ch/user/a/asparker/public/LFVTopCode_MyFork/Feb18/CMSSW_10_6_4/src/data/TopLFV/lib/main.so" ]
+config.JobType.inputFiles = ['crab_script_%s.py' % ( idname), "/afs/cern.ch/user/a/asparker/public/LFVTopCode_MyFork/Feb18/CMSSW_10_6_4/src/data/TopLFV/input/RoccoR2017.txt","/afs/cern.ch/user/a/asparker/public/LFVTopCode_MyFork/Feb18/CMSSW_10_6_4/src/data/TopLFV/include/MyAnalysis.h", "/afs/cern.ch/user/a/asparker/public/LFVTopCode_MyFork/Feb18/CMSSW_10_6_4/src/data/TopLFV/lib/main.so", 'haddnano.py' ]
 
 config.JobType.sendPythonFolder = True
 config.JobType.allowUndistributedCMSSW = True
