@@ -49,7 +49,7 @@ SAMPLES.update(nano_files_2017.data2017_samples)
 
 ## set to thi for testing
 #'2017_ST_atW'
-ARGS.SELECTED = '2017_DYM10to50'  #'2017_C_DoubleMu'   #'2017_LFVStVecU' #'2017_ST_atW'
+ARGS.SELECTED = '2017_TTZToLLNuNu' #TTZToQQ'  #'2017_TTWJetsToLNu'  #'2017_DYM10to50'  #'2017_C_DoubleMu'   #'2017_LFVStVecU' #'2017_ST_atW'
 #data2017_samples['2017_F_DoubleMu'] = [['/DoubleMuon/piedavid-Run2017F-31Mar2018-v1_TopNanoAODv6-1-1_2017-9721c24ccc7f925c513e24ff74941177/USER','/store/user/piedavid/topNanoAOD/v6-1-1/2017/DoubleMuon/TopNanoAODv6-1-1_2017/200615_080726/0000/'], 'data','DoubleMu','2017', 'F','1','1','1']
 
 
@@ -134,6 +134,8 @@ for key, item in SAMPLES.items() :
                
                 ARGS.DATASET = [ dataset[1]  , dataset[2]  ]
                 published = False
+                if '2017_TTZToQQ' in key :
+                    ARGS.DATASET = [ dataset[1]  , dataset[2] , dataset[3]  ]
                 ### if there is more than 1 dataset, eg. if there are extensions to the MC, 
                 ### then usually, 1st in list is the dataset name
                 ### 2nd entry is basically a duplicate, it is the file location of that same datset
