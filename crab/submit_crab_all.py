@@ -133,6 +133,7 @@ for key, item in SAMPLES.items() :
             if 'USER' in splits:
                
                 ARGS.DATASET = [ dataset[1]  , dataset[2]  ]
+                published = False
                 ### if there is more than 1 dataset, eg. if there are extensions to the MC, 
                 ### then usually, 1st in list is the dataset name
                 ### 2nd entry is basically a duplicate, it is the file location of that same datset
@@ -355,7 +356,7 @@ open('%s/crab_submitter.py' % (dirname), 'w').write(SUBMIT_SCRIPT.format(**ARGS.
 print "You have successfully created CRAB submit scripts =D"
 print "now you need to submit your jobs"
 print "get a grid proxy by doing : "
-print "grid-proxy-init --voms cms"
+print "voms-proxy-init --voms cms"
 print "then cd to the CRABtasks directory and run:"
 print "python crab_submitter.py"
 print "That script will contain commands to run all of the scripts you just created..."

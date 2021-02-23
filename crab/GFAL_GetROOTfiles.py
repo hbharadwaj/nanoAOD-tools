@@ -16,7 +16,7 @@ def GFAL_GetROOTfiles( path, gfalstr = "root://cms-xrd-global.cern.ch/" ):
     print path
     print "path..."
     if 'CRAB' in path:
-        testlstxt = "ls " + path
+        testlstxt = "ls /eos/cms" + path
     os.system( testlstxt )
     print testlstxt
     print "testlstxt"
@@ -27,6 +27,23 @@ def GFAL_GetROOTfiles( path, gfalstr = "root://cms-xrd-global.cern.ch/" ):
         if '.root' in fn :                   
             rootfiles.append( xrdstr +  path + fn )
         #if v :  print "Adding to txt file :  {}".format( xrdstr + path + fn  )
+
+    if len(rootfiles) < 2 :
+        print "Try using ls "
+        
+        lsnew1 = "ls " +'/eos/cms'+  path
+
+
+        for fn in filter(None,os.popen( lsnew1  ).read().split('\n')):
+            rootfiles.append( xrdstr + '/eos/cms' + path + fn )
+
+    if len(rootfiles) < 2 :
+        print "Try using gfal-ls "
+        cmd2 = 'env -i X509_USER_PROXY=/tmp/x509up_u$UID gfal-ls  srm://ingrid-se02.cism.ucl.ac.be:8444/srm/managerv2?SFN=/storage/data/cms'+ path
+
+        for fn in filter(None,os.popen( cmd2  ).read().split('\n')):
+            if '.root' in fn :
+                rootfiles.append( xrdstr +  path + fn )
 
 
     return rootfiles
