@@ -49,7 +49,7 @@ SAMPLES.update(nano_files_2017.data2017_samples)
 
 ## set to thi for testing
 #'2017_ST_atW'
-ARGS.SELECTED = '2017_TTZToLLNuNu' #TTZToQQ'  #'2017_TTWJetsToLNu'  #'2017_DYM10to50'  #'2017_C_DoubleMu'   #'2017_LFVStVecU' #'2017_ST_atW'
+ARGS.SELECTED = None #'2017_TTZToLLNuNu' #TTZToQQ'  #'2017_TTWJetsToLNu'  #'2017_DYM10to50'  #'2017_C_DoubleMu'   #'2017_LFVStVecU' #'2017_ST_atW'
 #data2017_samples['2017_F_DoubleMu'] = [['/DoubleMuon/piedavid-Run2017F-31Mar2018-v1_TopNanoAODv6-1-1_2017-9721c24ccc7f925c513e24ff74941177/USER','/store/user/piedavid/topNanoAOD/v6-1-1/2017/DoubleMuon/TopNanoAODv6-1-1_2017/200615_080726/0000/'], 'data','DoubleMu','2017', 'F','1','1','1']
 
 
@@ -76,6 +76,8 @@ print "Now submitting your CRAB jobs to find the LFV Top selected events from ou
 #,955' ## <-  is event number from miniaod, we must be missing an extension                                                                                    
 
 
+## list of keys we ran over to use for the CRAB submit script
+ids = []
 
 for key, item in SAMPLES.items() :
 #    ARGS.DATASET = samp
@@ -83,7 +85,7 @@ for key, item in SAMPLES.items() :
     if ARGS.SELECTED != None :
         if key != ARGS.SELECTED :
             continue
-
+    print "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ new MC or data sample $$$$$$$$$$$$$$$$$$$$$$$$$"  
     print key 
     print item
     print SAMPLES[key]
@@ -120,16 +122,16 @@ for key, item in SAMPLES.items() :
         
         print splits
         if 'USER' in splits:
-            ARGS.DATASET = dataset[0]
+            ARGS.DATASET = [dataset[0]]
             published = True
             print "Dataset name was given so CRAB submission will use this to submit"
         elif '0000' in splits:
-            ARGS.DATASET = dataset[0]
+            ARGS.DATASET = [dataset[0]]
             published = False
             print "Dataset location was given so CRAB submission will use files in that location to submit"            
  
         print "WARNING: If any dataset has more than 1 input dataset or file location this script is only submitting the first, fix this soon..."
-        if ( len(dataset) > 2  or  (published == False and len(dataset) == 2  ) ):
+        if ( len(dataset) > 2  ):
             if 'USER' in splits:
                
                 ARGS.DATASET = [ dataset[1]  , dataset[2]  ]
@@ -151,9 +153,9 @@ for key, item in SAMPLES.items() :
 
 
     elif  len(dataset)  == 1 :
-        ARGS.DATASET =  dataset[0] 
-        if '0000' in splits: 
-            published = False
+        ARGS.DATASET =  [dataset[0]] 
+        #if '0000' in splits: 
+        published = False
 
     elif len(dataset)  < 1 :    
         print "ERROR: No dataset name or file location given!!! "
@@ -207,13 +209,18 @@ config.Data.inputDataset = '{DATASET}'
 '''
 
 
-    if (not published or len(ARGS.DATASET) == 2 ):
+    if not published :
         if len(ARGS.DATASET) == 1 :
+            print dataset
             print "getting files for unpublished submission : "
             ARGS.DATASET = GFAL_GetROOTfiles( dataset[0] )
         else :
            df = [] #None
+           print ARGS.DATASET
+           print len(ARGS.DATASET)
+
            for d in ARGS.DATASET:
+               print d 
                tdf = GFAL_GetROOTfiles( d )
                df += tdf
            ARGS.DATASET = df
@@ -337,23 +344,30 @@ fi
     '''
     open('%s/crab_script_%s.sh' % (dirname, idname), 'w').write(BASH_SCRIPT.format(**ARGS.__dict__))
 
-    
-    ARGS.ID = idname 
-
-    subCommand = '''                                                                                                                                         
-idname = '{ID}'
-print " Submitting CRAB job for dataset : %s " % ( idname  )
-subprocess.call('crab submit -c crabConfig%s.py' % (  idname  ), shell=True)
-subprocess.call('echo "crab submit -c crabConfig%s.py" ' % (  idname  ), shell=True)
-
-
-'''
-    SUBMIT_SCRIPT += subCommand
+    ids.append(idname)
 
 subprocess.call('cp PSet.py %s/PSet.py' % (dirname), shell=True)
 subprocess.call('cd %s' % (dirname), shell=True)
 subprocess.call('ln -s $CMSSW_BASE/src/PhysicsTools/NanoAODTools/scripts/haddnano.py .', shell=True)
-    
+
+sublist = []
+for aid in ids :
+    ARGS.ID = aid
+#idname%s = '%s'
+    subCommand = '''                                                                                                                                         
+print " Submitting CRAB job for dataset : %s "   )                                                                                           
+subprocess.call('crab submit -c crabConfig%s.py' , shell=True)                                                                            
+subprocess.call('echo "crab submit -c crabConfig%s.py" ' , shell=True)                                                                     
+                                                                                                                        
+'''% (aid, aid, aid)
+ 
+    sublist.append(subCommand)   
+    SUBMIT_SCRIPT += subCommand
+#print sublist    
+
+#for s in sublist :
+#    SUBMIT_SCRIPT += subCommand
+
 open('%s/crab_submitter.py' % (dirname), 'w').write(SUBMIT_SCRIPT.format(**ARGS.__dict__))
 print "You have successfully created CRAB submit scripts =D"
 print "now you need to submit your jobs"
