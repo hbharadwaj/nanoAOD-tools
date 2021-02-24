@@ -85,22 +85,22 @@ data2017_samples['2017_F_DoubleMu'] = [['/DoubleMuon/piedavid-Run2017F-31Mar2018
 
 #/pnfs/iihe/cms/store/user/rgoldouz/TopLfvFullSim/2017/IIHE_Ntuple/ntuple_SMEFTfr_ST_clequ3_emutu
 
-mc2017_samples['2017_LFVStVecC'] = [['/eos/cms/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201007_155453/0000/'], 'mc','','2017', '','0.04' ,'41.53','500000']
-mc2017_samples['2017_LFVStVecU'] = [['/eos/cms/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201007_155716/0000/'], 'mc','','2017', '','0.452' ,'41.53','494000']
-mc2017_samples['2017_LFVTtVecC'] = [['/eos/cms/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201008_025340/0000/'], 'mc','','2017', '','0.032'  ,'41.53','500000']
-mc2017_samples['2017_LFVTtVecU'] = [['/eos/cms/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201008_025758/0000/'], 'mc','','2017', '','0.032','41.53','498000']
+mc2017_samples['2017_LFVStVecC'] = [['/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201007_155453/0000/'], 'mc','','2017', '','0.04' ,'41.53','500000']
+mc2017_samples['2017_LFVStVecU'] = [['/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201007_155716/0000/'], 'mc','','2017', '','0.452' ,'41.53','494000']
+mc2017_samples['2017_LFVTtVecC'] = [['/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201008_025340/0000/'], 'mc','','2017', '','0.032'  ,'41.53','500000']
+mc2017_samples['2017_LFVTtVecU'] = [['/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201008_025758/0000/'], 'mc','','2017', '','0.032','41.53','498000']
 
 #tensor interaction
-mc2017_samples['2017_LFVStTensorC'] = [['/eos/cms/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201007_150454/0000/'], 'mc','','2017', '','0.187' ,'41.53','500000']
-mc2017_samples['2017_LFVStTensorU'] = [['/eos/cms/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201007_150303/0000/'], 'mc','','2017', '','1.9' ,'41.53','500000']
-mc2017_samples['2017_LFVTtTensorC'] = [['/eos/cms/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201007_153218/0000/'], 'mc','','2017', '','0.1876','41.53','500000']
-mc2017_samples['2017_LFVTtTensorU'] = [['/eos/cms/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201007_152919/0000/'], 'mc','','2017', '','0.1876','41.53','500000']
+mc2017_samples['2017_LFVStTensorC'] = [['/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201007_150454/0000/'], 'mc','','2017', '','0.187' ,'41.53','500000']
+mc2017_samples['2017_LFVStTensorU'] = [['/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201007_150303/0000/'], 'mc','','2017', '','1.9' ,'41.53','500000']
+mc2017_samples['2017_LFVTtTensorC'] = [['/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201007_153218/0000/'], 'mc','','2017', '','0.1876','41.53','500000']
+mc2017_samples['2017_LFVTtTensorU'] = [['/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201007_152919/0000/'], 'mc','','2017', '','0.1876','41.53','500000']
 
 #scalar interaction                                                                                                                                                                                                
-mc2017_samples['2017_LFVStScalarC'] = [['/eos/cms/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201007_133418/0000/'], 'mc','','2017', '','0.008' ,'41.53','500000']
-mc2017_samples['2017_LFVStScalarU'] = [['/eos/cms/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201007_145731/0000/'], 'mc','','2017', '','0.102' ,'41.53','500000']
-mc2017_samples['2017_LFVTtScalarC'] = [['/eos/cms/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201007_153437/0000/'], 'mc','','2017', '','0.004'  ,'41.53','500000']
-mc2017_samples['2017_LFVTtScalarU'] = [['/eos/cms/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201008_024659/0000/'], 'mc','','2017', '','0.004','41.53','500000']
+mc2017_samples['2017_LFVStScalarC'] = [['/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201007_133418/0000/'], 'mc','','2017', '','0.008' ,'41.53','500000']
+mc2017_samples['2017_LFVStScalarU'] = [['/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201007_145731/0000/'], 'mc','','2017', '','0.102' ,'41.53','500000']
+mc2017_samples['2017_LFVTtScalarC'] = [['/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201007_153437/0000/'], 'mc','','2017', '','0.004'  ,'41.53','500000']
+mc2017_samples['2017_LFVTtScalarU'] = [['/store/user/asparker/TopLFV_nanoAOD/v6-1-1/2017/CRAB_UserFiles/TopNanoAODv6-1-1_2017/201008_024659/0000/'], 'mc','','2017', '','0.004','41.53','500000']
 
 
 

@@ -49,7 +49,7 @@ SAMPLES.update(nano_files_2017.data2017_samples)
 
 ## set to thi for testing
 #'2017_ST_atW'
-ARGS.SELECTED = None #'2017_TTZToLLNuNu' #TTZToQQ'  #'2017_TTWJetsToLNu'  #'2017_DYM10to50'  #'2017_C_DoubleMu'   #'2017_LFVStVecU' #'2017_ST_atW'
+#ARGS.SELECTED = None #'2017_TTZToLLNuNu' #TTZToQQ'  #'2017_TTWJetsToLNu'  #'2017_DYM10to50'  #'2017_C_DoubleMu'   #'2017_LFVStVecU' #'2017_ST_atW'
 #data2017_samples['2017_F_DoubleMu'] = [['/DoubleMuon/piedavid-Run2017F-31Mar2018-v1_TopNanoAODv6-1-1_2017-9721c24ccc7f925c513e24ff74941177/USER','/store/user/piedavid/topNanoAOD/v6-1-1/2017/DoubleMuon/TopNanoAODv6-1-1_2017/200615_080726/0000/'], 'data','DoubleMu','2017', 'F','1','1','1']
 
 
@@ -82,9 +82,9 @@ ids = []
 for key, item in SAMPLES.items() :
 #    ARGS.DATASET = samp
 
-    if ARGS.SELECTED != None :
-        if key != ARGS.SELECTED :
-            continue
+    #if ARGS.SELECTED != None :
+    #    if key != ARGS.SELECTED :
+    #        continue
     print "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ new MC or data sample $$$$$$$$$$$$$$$$$$$$$$$$$"  
     print key 
     print item
@@ -172,7 +172,7 @@ for key, item in SAMPLES.items() :
     ## era and lumi section e.g. 2017B 2018B 
     # id2 = splits[2].split('Run')[1].split('-')[0]
     idname = key #id0 +  id2
-
+    ARGS.SELECTED = idname
     ## just letter e.g. B
 
 
@@ -203,11 +203,6 @@ config.JobType.inputFiles = ['crab_script_%s.py' % ( idname), "/afs/cern.ch/user
 config.JobType.sendPythonFolder = True
 config.JobType.allowUndistributedCMSSW = True
 '''
-    CRAB_CFG_PUB= '''
-config.section_("Data")
-config.Data.inputDataset = '{DATASET}'
-'''
-
 
     if not published :
         if len(ARGS.DATASET) == 1 :
@@ -236,6 +231,14 @@ filelist = {DATASET}
 config.Data.userInputFiles = filelist
   
 '''
+
+    if published:
+        ARGS.DATASET = dataset[0]
+        CRAB_CFG_PUB= '''                                                                                                                                         
+config.section_("Data")                                                                                                                                       
+config.Data.inputDataset = '{DATASET}'                                                                                                                        
+'''
+
 
     CRAB_CFG3 = '''
 config.Data.inputDBS = 'phys03'
@@ -355,7 +358,7 @@ for aid in ids :
     ARGS.ID = aid
 #idname%s = '%s'
     subCommand = '''                                                                                                                                         
-print " Submitting CRAB job for dataset : %s "   )                                                                                           
+print " Submitting CRAB job for dataset : %s "                                                                                              
 subprocess.call('crab submit -c crabConfig%s.py' , shell=True)                                                                            
 subprocess.call('echo "crab submit -c crabConfig%s.py" ' , shell=True)                                                                     
                                                                                                                         
