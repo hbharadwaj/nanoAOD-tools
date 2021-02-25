@@ -68,11 +68,11 @@ class PostProcessor :
                 self.histFile = None
 
         
-            for m in self.modules:
-                if hasattr( m, 'writeHistFile') and m.writeHistFile :
-                    m.beginJob(histFile=self.histFile,histDirName=self.histDirName)
-                else :
-                    m.beginJob()
+        for m in self.modules:
+            if hasattr( m, 'writeHistFile') and m.writeHistFile :
+                m.beginJob(histFile=self.histFile,histDirName=self.histDirName)
+            else :
+                m.beginJob()
 
 
         fullClone = (len(self.modules) == 0)
