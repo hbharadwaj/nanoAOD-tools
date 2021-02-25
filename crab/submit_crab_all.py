@@ -35,7 +35,7 @@ ARGS = parser.parse_args()
 
 SAMPLES = {}
 
-SAMPLES.update(nano_files_2017.mc2017_samples)
+#SAMPLES.update(nano_files_2017.mc2017_samples)
 SAMPLES.update(nano_files_2017.data2017_samples)
 
 
@@ -243,7 +243,7 @@ config.Data.inputDataset = '{DATASET}'
     CRAB_CFG3 = '''
 config.Data.inputDBS = 'phys03'
 config.Data.splitting = 'FileBased'
-config.Data.unitsPerJob = 15
+config.Data.unitsPerJob = 10
 
 config.Data.outLFNDirBase = '/store/user/%s/NanoPosttest_%s_%s' % ( 'asparker', '{DATE}' ,idname )
 config.Data.publication = False
@@ -279,13 +279,13 @@ modulesList = []
 from PhysicsTools.NanoAODTools.postprocessing.modules.lfv.MyAnalysisCC import *
 
 
-#from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetmetHelperRun2 import *
+from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetmetHelperRun2 import *
 
 
 ch = ROOT.TChain("Events")
-#if not {ISDATA} :
-#    jmeCorrections = createJMECorrector(True, "2017", "", "Total", "AK4PFchs")
-#    modulesList.append( jmeCorrections() )
+if not {ISDATA} :
+    jmeCorrections = createJMECorrector(True, "2017", "", "Total", "AK4PFchs")
+    modulesList.append( jmeCorrections() )
 
 modulesList.append( MyAnalysisCC( '{ISDATA}'  , ch , [ "output_hists.root",   '{MCORDATA}' ,'{DATATYPE}', '{ERA}' , '{LETTER}' , {XSEC}, {LUMI} , {NEV} ] ))
 
