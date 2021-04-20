@@ -154,11 +154,11 @@ for key, value in SAMPLES.items():
 # os.system('rm *_TTbar.root')
 
 # hadddata_2017 ='hadd'+ out_dir_h + '2017_data' + '.root ' + ' '.join(addedFilesData['2017'])
-haddmc_2017 ='hadd'+ out_dir_h + '2017_others' + '.root ' + ' '.join(addedFilesMc['2017'])
-haddTTV_2017 ='hadd'+ out_dir_h + '2017_TTV' + '.root ' + ' '.join(addedFilesTTV['2017'])
-haddWZ_2017 ='hadd'+ out_dir_h + '2017_WZ' + '.root ' + ' '.join(addedFilesWZ['2017'])
-haddZZ_2017 ='hadd'+ out_dir_h + '2017_ZZ' + '.root ' + ' '.join(addedFilesZZ['2017'])
-haddTTbar_2017 ='hadd'+ out_dir_h + '2017_TTbar' + '.root ' + ' '.join(addedFilesTTbar['2017'])
+haddmc_2017 ='hadd '+ out_dir_h + '2017_others' + '.root ' + ' '.join(addedFilesMc['2017'])
+haddTTV_2017 ='hadd '+ out_dir_h + '2017_TTV' + '.root ' + ' '.join(addedFilesTTV['2017'])
+haddWZ_2017 ='hadd '+ out_dir_h + '2017_WZ' + '.root ' + ' '.join(addedFilesWZ['2017'])
+haddZZ_2017 ='hadd '+ out_dir_h + '2017_ZZ' + '.root ' + ' '.join(addedFilesZZ['2017'])
+haddTTbar_2017 ='hadd '+ out_dir_h + '2017_TTbar' + '.root ' + ' '.join(addedFilesTTbar['2017'])
 
 os.system(haddmc_2017)
 os.system(haddTTV_2017)
