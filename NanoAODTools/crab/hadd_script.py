@@ -118,6 +118,7 @@ for key, item in SAMPLES.items() :
         hadd4CRAB3(args.input_directory_orig[0]+str(key)+"/",out_dir,key)
 
 
+year = "2017"
 addedFilesData = {"2017": []}
 addedFilesMc = {"2017": []}
 addedFilesTTV = {"2017": []}
@@ -125,7 +126,7 @@ addedFilesWZ = {"2017": []}
 addedFilesZZ = {"2017": []}
 addedFilesTTbar = {"2017": []}
 
-out_dir_h = out_dir + '/haddedFiles/'
+out_dir_h = out_dir #+ '/haddedFiles/'
 if not (os.path.exists(out_dir_h)):
     os.makedirs(out_dir_h)
 
@@ -146,11 +147,11 @@ for key, value in SAMPLES.items():
         hadd='hadd ' + out_dir + key + '.root '
 
 # os.system('rm *_data.root')
-os.system('rm *_others.root')
-os.system('rm *_TTV.root')
-os.system('rm *_WZ.root')
-os.system('rm *_ZZ.root')
-os.system('rm *_TTbar.root')
+# os.system('rm *_others.root')
+# os.system('rm *_TTV.root')
+# os.system('rm *_WZ.root')
+# os.system('rm *_ZZ.root')
+# os.system('rm *_TTbar.root')
 
 # hadddata_2017 ='hadd'+ out_dir_h + '2017_data' + '.root ' + ' '.join(addedFilesData['2017'])
 haddmc_2017 ='hadd'+ out_dir_h + '2017_others' + '.root ' + ' '.join(addedFilesMc['2017'])
