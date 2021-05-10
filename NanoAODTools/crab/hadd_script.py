@@ -9,6 +9,7 @@ import nano_files_2017
 SAMPLES = {}
 
 SAMPLES.update(nano_files_2017.mc2017_samples)
+SAMPLES.update(nano_files_2017.data2017_samples)
 
 parse = argparse.ArgumentParser(prog='NTupleReader')
 
@@ -115,10 +116,9 @@ for key, item in SAMPLES.items() :
     print ''
 
     if(os.path.exists(args.input_directory_orig[0]+str(key))):
-        hadd4CRAB3(args.input_directory_orig[0]+str(key)+"/",out_dir,key)
+        hadd4CRAB3(args.input_directory_orig[0]+str(key)+"/",out_dir,key,args.file_extension_orig[0],args.file_keyword_orig[0])
 
 
-year = "2017"
 addedFilesData = {"2017": []}
 addedFilesMc = {"2017": []}
 addedFilesTTV = {"2017": []}
@@ -146,20 +146,21 @@ for key, value in SAMPLES.items():
     else:
         hadd='hadd ' + out_dir + key + '.root '
 
-# os.system('rm *_data.root')
-# os.system('rm *_others.root')
-# os.system('rm *_TTV.root')
-# os.system('rm *_WZ.root')
-# os.system('rm *_ZZ.root')
-# os.system('rm *_TTbar.root')
+ os.system('rm '+out_dir_h +' *_data.root')
+os.system('rm '+out_dir_h+' *_others.root')
+os.system('rm '+out_dir_h+' *_TTV.root')
+os.system('rm '+out_dir_h+' *_WZ.root')
+os.system('rm '+out_dir_h+' *_ZZ.root')
+os.system('rm '+out_dir_h+' *_TTbar.root')
 
-# hadddata_2017 ='hadd'+ out_dir_h + '2017_data' + '.root ' + ' '.join(addedFilesData['2017'])
+hadddata_2017 ='hadd '+ out_dir_h + '2017_data' + '.root ' + ' '.join(addedFilesData['2017'])
 haddmc_2017 ='hadd '+ out_dir_h + '2017_others' + '.root ' + ' '.join(addedFilesMc['2017'])
 haddTTV_2017 ='hadd '+ out_dir_h + '2017_TTV' + '.root ' + ' '.join(addedFilesTTV['2017'])
 haddWZ_2017 ='hadd '+ out_dir_h + '2017_WZ' + '.root ' + ' '.join(addedFilesWZ['2017'])
 haddZZ_2017 ='hadd '+ out_dir_h + '2017_ZZ' + '.root ' + ' '.join(addedFilesZZ['2017'])
 haddTTbar_2017 ='hadd '+ out_dir_h + '2017_TTbar' + '.root ' + ' '.join(addedFilesTTbar['2017'])
 
+os.system(hadddata_2017)
 os.system(haddmc_2017)
 os.system(haddTTV_2017)
 os.system(haddWZ_2017)
